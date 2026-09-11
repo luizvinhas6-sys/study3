@@ -1,0 +1,624 @@
+{
+  "version": "1.0",
+  "settings": {
+    "weekly_target_hours": 22.0,
+    "weekday_hours": 2.0,
+    "weekend_hours": 6.0,
+    "approval_year": 2030,
+    "daily_hours": {
+      "Monday": 2.0,
+      "Tuesday": 2.0,
+      "Wednesday": 2.0,
+      "Thursday": 2.0,
+      "Friday": 2.0,
+      "Saturday": 6.0,
+      "Sunday": 6.0
+    }
+  },
+  "subjects": [
+    {
+      "name": "Circuitos Elétricos",
+      "type": "Específica",
+      "order": 1,
+      "active": true,
+      "block_minutes": 60
+    },
+    {
+      "name": "Língua Portuguesa",
+      "type": "Básica",
+      "order": 2,
+      "active": true,
+      "block_minutes": 60
+    },
+    {
+      "name": "Raciocínio Lógico e Matemático - RLM",
+      "type": "Básica",
+      "order": 4,
+      "active": true,
+      "block_minutes": 60
+    },
+    {
+      "name": "Eletromagnetismo",
+      "type": "Específica",
+      "order": 5,
+      "active": true,
+      "block_minutes": 60
+    },
+    {
+      "name": "Máquinas Elétricas",
+      "type": "Específica",
+      "order": 6,
+      "active": true,
+      "block_minutes": 60
+    },
+    {
+      "name": "NBRs",
+      "type": "Específica",
+      "order": 7,
+      "active": true,
+      "block_minutes": 60
+    }
+  ],
+  "topics": [
+    {
+      "id": "blk-2026-09-08T21:15:53-0",
+      "subject": "Língua Portuguesa",
+      "name": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-1",
+      "subject": "Língua Portuguesa",
+      "name": "2 Tipologia Textual. Gêneros Textuais",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-2",
+      "subject": "Língua Portuguesa",
+      "name": "3 Coesão e coerência",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-3",
+      "subject": "Língua Portuguesa",
+      "name": "4 Redação - Reescritura de texto (Oralidade e escrita: processos de retextualização)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-4",
+      "subject": "Língua Portuguesa",
+      "name": "5 Variação Linguística; linguagem formal e informal",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-5",
+      "subject": "Língua Portuguesa",
+      "name": "6. Multimodalidade",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-6",
+      "subject": "Língua Portuguesa",
+      "name": "7 Funções da Linguagem(ex: emotiva, apelativa, referencial, metalinguística, fática e poética)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-7",
+      "subject": "Língua Portuguesa",
+      "name": "8 Intertextualidade",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-8",
+      "subject": "Língua Portuguesa",
+      "name": "9 Semântica - Significação Contextual de Palavras e Expressões. Denotação e Conotação",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-9",
+      "subject": "Língua Portuguesa",
+      "name": "10 Figuras de Linguagem",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-10",
+      "subject": "Língua Portuguesa",
+      "name": "11. Conhecimentos linguísticos (Morfologia e Sintaxe)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-11",
+      "subject": "Língua Portuguesa",
+      "name": "12. Paragrafação",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-12",
+      "subject": "Língua Portuguesa",
+      "name": "13. Ortografia, grafia e Novo Acordo",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:15:53-13",
+      "subject": "Língua Portuguesa",
+      "name": "14. Emprego de sinais de pontuação",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-0",
+      "subject": "Circuitos Elétricos",
+      "name": "1 Circuitos CC - Leis de Kirchhoff (LKT e LKC), Divisores de V/I",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-1",
+      "subject": "Circuitos Elétricos",
+      "name": "2 Circuitos CC - Teoremas: Thevenin, Norton, Superposição e Máxima Potência",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-2",
+      "subject": "Circuitos Elétricos",
+      "name": "3 Circuitos CC - Capacitores e Indutores: Comportamento em Regime Permanente",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-3",
+      "subject": "Circuitos Elétricos",
+      "name": "4 Circuitos CC - Transitórios de 1ª Ordem (Circuitos RC e RL)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-4",
+      "subject": "Circuitos Elétricos",
+      "name": "5 Laplace & Transitórios - Resposta de Circuitos RLC e Análise com Transformada de Laplace",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-5",
+      "subject": "Circuitos Elétricos",
+      "name": "6 Laplace & Sinais - Análise de Resposta Transitória, Erros em Regime Estacionário e Fourier",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-6",
+      "subject": "Circuitos Elétricos",
+      "name": "7 Circuitos CA - Fasores, Impedância, Admitância e Reatâncias",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-7",
+      "subject": "Circuitos Elétricos",
+      "name": "8 Circuitos CA - Triângulo de Potências e Fator de Potência",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-8",
+      "subject": "Circuitos Elétricos",
+      "name": "9 Circuitos CA - Ressonância Série/Paralela e Resposta em Frequência",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-9",
+      "subject": "Circuitos Elétricos",
+      "name": "10 Trifásicos - Relações de Fase/Linha em Y e Delta (Δ)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:29:31-10",
+      "subject": "Circuitos Elétricos",
+      "name": "11 Trifásicos - Sistemas Desequilibrados e Potência em Trifásicos",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:47:55-0",
+      "subject": "Eletromagnetismo",
+      "name": "1 Leis de Maxwell (Forma Integral e Diferencial)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:47:55-1",
+      "subject": "Eletromagnetismo",
+      "name": "2 Força de Lorentz e Lei de Biot-Savart",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:47:55-2",
+      "subject": "Eletromagnetismo",
+      "name": "3 Circuitos Magnéticos: Relutância, Fluxo e FMM",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:47:55-3",
+      "subject": "Eletromagnetismo",
+      "name": "4 Indutância Mútua e Acoplamento Magnético",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:47:55-4",
+      "subject": "Eletromagnetismo",
+      "name": "5 Histerese, Saturação e Correntes de Foucault",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "top-2026-09-08T21:48:34",
+      "subject": "Máquinas Elétricas",
+      "name": "Introdução / Geral",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "created_at": "2026-09-08T21:48:34",
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-0",
+      "subject": "Máquinas Elétricas",
+      "name": "1.1 Transformadores - Transformador Ideal vs. Real (Circuito Equivalente)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-1",
+      "subject": "Máquinas Elétricas",
+      "name": "1.2 Transformadores - Ensaios de Vazio e Curto-Circuito (Parâmetros)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-2",
+      "subject": "Máquinas Elétricas",
+      "name": "1.3 Transformadores - Regulação de Tensão e Eficiência",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-3",
+      "subject": "Máquinas Elétricas",
+      "name": "1.4 Transformadores - Transformadores Trifásicos: Conexões e Grupos Vetoriais",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-4",
+      "subject": "Máquinas Elétricas",
+      "name": "2 Autotransf. - Autotransformadores: Ganho de Potência e Conexões",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-5",
+      "subject": "Máquinas Elétricas",
+      "name": "3 TCs e TPs - Transformadores de Instrumento: Erros e Burden",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-6",
+      "subject": "Máquinas Elétricas",
+      "name": "4.1 Indução (MIT) - Escorregamento, Torque e Balanço de Potência",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-7",
+      "subject": "Máquinas Elétricas",
+      "name": "4.2 Indução (MIT) - Curva Torque-Velocidade e Classes de Motores (N, H, D)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-8",
+      "subject": "Máquinas Elétricas",
+      "name": "5.1 Síncrona - Alternadores: Funcionamento e Reatância Síncrona",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-9",
+      "subject": "Máquinas Elétricas",
+      "name": "5.2 Síncrona - Curva de Capabilidade e Curvas V do Motor Síncrono",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:50:52-10",
+      "subject": "Máquinas Elétricas",
+      "name": "6 Máquina CC - Motores CC: Shunt, Série, Composto e Controle de Velocidade",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "top-2026-09-08T21:53:19",
+      "subject": "NBRs",
+      "name": "Introdução / Geral",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "created_at": "2026-09-08T21:53:19",
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:53:47-0",
+      "subject": "NBRs",
+      "name": "1 NBR 5410\tPrevisão de Carga (Iluminação e TUGs)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:53:47-1",
+      "subject": "NBRs",
+      "name": "2 NBR 5410\tDimensionamento: Seção Mínima, Corrente e Queda de Tensão",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:53:47-2",
+      "subject": "NBRs",
+      "name": "3 NBR 5410\tEsquemas de Aterramento e Dispositivos DR/DPS",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:53:47-3",
+      "subject": "NBRs",
+      "name": "4 NBR 5419\tSPDA: Níveis de Proteção e Gerenciamento de Risco",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T21:53:47-4",
+      "subject": "NBRs",
+      "name": "5 Média Tensão\tInstalações Elétricas de Média Tensão e NBR 14039",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-0",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "1.1\tMatemática Básica e Numérica\tConjuntos numéricos (naturais, inteiros, racionais, irracionais e reais), operações fundamentais e sistema de numeração",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-1",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "1.2\tMatemática Básica e Numérica\tDivisibilidade, fatoração, MDC e MMC",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-2",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "1.3\tMatemática Básica e Numérica\tOperações com frações, representação decimal e números decimais periódicos e não periódicos",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-3",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "2.1\tMatemática Comercial e Financeira\tRazões, proporções e regra de três simples e composta",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-4",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "2.2\tMatemática Comercial e Financeira\tPorcentagem, juros simples e descontos",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-5",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "3.1\tÁlgebra, Funções e Sequências\tCálculo algébrico: equações do 1° grau e raízes de equações algébricas",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-6",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "3.2\tÁlgebra, Funções e Sequências\tConceitos de função (domínio, imagem, gráfico) e estudo das funções polinomiais, exponenciais e logarítmicas",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-7",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "3.3\tÁlgebra, Funções e Sequências\tSequências: Progressões Aritméticas (PA) e Progressões Geométricas (PG)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-8",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "4.1\tEstatística Descritiva\tConceitos fundamentais de estatística descritiva (população, amostra e amostragem)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-9",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "4.2\tEstatística Descritiva\tOrganização de dados (tabelas e gráficos)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-10",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "4.3\tEstatística Descritiva\tMedidas de tendência central (média, moda e mediana)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-11",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "5.1\tAnálise Combinatória e Probabilidade\tPrincípio fundamental de contagem",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-12",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "5.2\tAnálise Combinatória e Probabilidade\tCombinação, arranjo e permutação simples",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-13",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "5.3\tAnálise Combinatória e Probabilidade\tProbabilidade de um evento",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-14",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "6.1\tGeometria Plana\tÁreas e perímetros de figuras planas (triângulos, quadriláteros e circunferências)",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-15",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "6.2\tGeometria Plana\tElementos geométricos: mediana e mediatriz",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-16",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "7.1\tRaciocínio Lógico e Analítico\tNoções básicas de lógica matemática: proposições, problemas com tabelas, argumentação e associação lógica",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-17",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "7.2\tRaciocínio Lógico e Analítico\tResolução de problemas de verdades e mentiras",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-18",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "7.3\tRaciocínio Lógico e Analítico\tDiagramas lógicos e sequências lógicas",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-19",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "7.4\tRaciocínio Lógico e Analítico\tPrincípio da Casa dos Pombos",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    },
+    {
+      "id": "blk-2026-09-08T22:00:32-20",
+      "subject": "Raciocínio Lógico e Matemático - RLM",
+      "name": "7.5\tRaciocínio Lógico e Analítico\tOrientação espacial e temporal",
+      "status": "Não iniciado",
+      "accuracy": null,
+      "last_studied": null
+    }
+  ],
+  "study_sessions": [],
+  "errors": [],
+  "meetings": [],
+  "cycle_index": 1,
+  "resumos": [],
+  "revisoes": []
+}
