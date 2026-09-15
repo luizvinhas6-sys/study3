@@ -21,42 +21,42 @@
       "type": "Específica",
       "order": 1,
       "active": true,
-      "block_minutes": 60
-    },
-    {
-      "name": "Língua Portuguesa",
-      "type": "Básica",
-      "order": 2,
-      "active": true,
-      "block_minutes": 60
+      "block_minutes": 120
     },
     {
       "name": "Raciocínio Lógico e Matemático - RLM",
       "type": "Básica",
-      "order": 4,
+      "order": 3,
       "active": true,
-      "block_minutes": 60
+      "block_minutes": 120
     },
     {
       "name": "Eletromagnetismo",
       "type": "Específica",
-      "order": 5,
+      "order": 4,
       "active": true,
-      "block_minutes": 60
+      "block_minutes": 120
     },
     {
       "name": "Máquinas Elétricas",
       "type": "Específica",
-      "order": 6,
+      "order": 5,
       "active": true,
-      "block_minutes": 60
+      "block_minutes": 120
     },
     {
       "name": "NBRs",
       "type": "Específica",
+      "order": 6,
+      "active": true,
+      "block_minutes": 120
+    },
+    {
+      "name": "Língua Portuguesa",
+      "type": "Básica",
       "order": 7,
       "active": true,
-      "block_minutes": 60
+      "block_minutes": 120
     }
   ],
   "topics": [
@@ -618,7 +618,7 @@
   "study_sessions": [],
   "errors": [],
   "meetings": [],
-  "cycle_index": 1,
+  "cycle_index": 0,
   "resumos": [],
   "revisoes": []
 }

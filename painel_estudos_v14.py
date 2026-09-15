@@ -50,7 +50,6 @@ DEFAULT_DATA = {
     "version": BACKUP_VERSION,
     "settings": {
         "weekly_target_hours": 22.0,
-        "approval_year": 2030,
         "daily_hours": {
             "Monday": 2.0, "Tuesday": 2.0, "Wednesday": 2.0, "Thursday": 2.0,
             "Friday": 2.0, "Saturday": 6.0, "Sunday": 6.0
@@ -208,7 +207,7 @@ ensure_session_state()
 inject_css()
 
 # -----------------------------
-# Sidebar (Hierarquia Ajustada + Guia Operacional no Topo)
+# Sidebar
 # -----------------------------
 st.sidebar.title("⚡ Painel Central")
 st.sidebar.caption("Gestão de Estudos • Engenharia Elétrica")
@@ -219,7 +218,7 @@ page = st.sidebar.radio("Navegação", [
     "⏱️ Executar Ciclo",
     "🔔 Notificações",
     "🔄 Revisões Espaçadas",
-    "📝 Resumos",
+    "📝 Resumos & Mapas Mentais",
     "❌ Caderno de Erros",
     "📋 Planilha de Controle",
     "📈 Desempenho & Prioridades",
@@ -229,10 +228,18 @@ page = st.sidebar.radio("Navegação", [
 ])
 
 st.sidebar.divider()
-st.sidebar.markdown("### Meta")
-st.sidebar.write("🎯 Aprovação: **2030**")
-st.sidebar.write("⏱️ Meta semanal: **22 h líquidas**")
-st.sidebar.write("🎓 Regra: **≥ 70% = assimilado**")
+
+# Bloco "Meta & Ritmo" com Horas Totais
+st.sidebar.markdown("### 📊 Status & Acumulado")
+weekly_sb, monthly_sb, total_sb = kpi_periods()
+weekly_target_sb = st.session_state.data["settings"]["weekly_target_hours"]
+pct_weekly_sb = min(100, (weekly_sb / weekly_target_sb) * 100) if weekly_target_sb > 0 else 0
+
+st.sidebar.progress(int(pct_weekly_sb), text=f"Semana: {weekly_sb:.1f}h / {weekly_target_sb}h ({pct_weekly_sb:.0f}%)")
+st.sidebar.markdown(f"⏱️ Meta semanal: **22 h líquidas**")
+st.sidebar.markdown(f"🏆 Total acumulado geral: **{total_sb:.1f} h**")
+st.sidebar.markdown(f"🎓 Regra: **≥ 70% = assimilado** *(domínio)*")
+
 st.sidebar.caption(st.session_state.last_saved_message)
 
 
@@ -240,65 +247,83 @@ st.sidebar.caption(st.session_state.last_saved_message)
 # 0. Guia Operacional
 # -----------------------------
 if page == "🧭 Guia Operacional":
-    st.title("🧭 Guia Operacional (Método dos Mestres)")
-    st.caption("O passo a passo estruturado para utilizar cada funcionalidade do painel com base no método de Alexandre Meirelles e William Douglas.")
+    st.title("🧭 Guia Operacional & Explicação das Fases")
+    st.caption("Entenda o fluxo do painel e o conceito pedagógico das Fases de Estudo baseadas no método de Alexandre Meirelles e William Douglas.")
 
     st.markdown("---")
-    st.markdown("### 📍 Fase 1: Planejamento & Estruturação")
+    st.markdown("### 🎯 O que significam as Fases de Estudo no registro de blocos?")
     st.markdown("""
-    * **📚 Edital Verticalizado:**  
-      Cadastre novas disciplinas e o conteúdo programático. Segundo William Douglas, o edital esmiuçado é seu mapa para guiar o estudo ativo.
-    * **⚙️ Ajustar Ciclo:**  
-      Organize sua ordem de matérias e horas diárias. Conforme Meirelles, planeje a semana de forma flexível e realista.
+    Ao registrar um bloco de estudo, você seleciona a **Fase** correspondente ao tipo de atividade realizada naquele momento:
+    * **Fase 1 — Teoria / Absorção + Fixação Inicial:**  
+      Primeiro contato com a matéria. Leitura de PDFs, apostilas, videoaulas e marcação dos conceitos fundamentais.
+    * **Fase 2 — Questões + Caderno de Erros:**  
+      Resolução de baterias de questões da banca para validar a teoria aprendida e preenchimento do Caderno de Erros com os pontos fracos.
+    * **Fase 3 — Revisão Ativa + Velocidade / Aprofundamento:**  
+      Fase de consolidação e alta performance. Revisão de flashcards, resumos e questões-chave.  
+      *📌 Nota:* Registrar um bloco concluído nas **Fases 2 ou 3** (desde que resolvendo questões) aciona o **Sistema Dinâmico de Repetição Espaçada**, que agenda automaticamente novos marcos de revisão com base no seu percentual de acertos!
     """)
 
     st.markdown("---")
-    st.markdown("### 📍 Fase 2: Execução Diária & Operação")
+    st.markdown("### 🗺️ Etapas de Organização do Painel")
     st.markdown("""
-    * **⏱️ Executar Ciclo:**  
-      Ligue o cronômetro progressivo e registre o bloco. Siga a rotação contínua de Meirelles para eliminar o engessamento diário.
-    * **🔔 Notificações:**  
-      Confira diariamente revisões vencidas e alertas do ritmo. Douglas destaca que a consistência diária supera picos de estudo.
-    """)
-
-    st.markdown("---")
-    st.markdown("### 📍 Fase 3: Fixação & Aprendizado Ativo")
-    st.markdown("""
-    * **🔄 Revisões Espaçadas:**  
-      Execute as revisões programadas nos prazos automáticos. Meirelles reforça que revisar constantemente é mais importante que avançar matéria.
-    * **📝 Resumos:**  
-      Anexe fotos de esquemas visuais e fórmulas. Douglas reforça que sintetizar a matéria em material próprio acelera a revisão final.
-    * **❌ Caderno de Erros:**  
-      Registre cada questão errada e seu motivo. Segundo William Douglas, o aprovado é quem mais aprende corrigindo seus pontos fracos.
-    """)
-
-    st.markdown("---")
-    st.markdown("### 📍 Fase 4: Auditoria, Desempenho & Ajustes")
-    st.markdown("""
-    * **📋 Planilha de Controle:**  
-      Monitore o avanço percentual e status de cada tópico, garantindo a cobertura total do edital sem lacunas no seu radar.
-    * **📈 Desempenho & Prioridades:**  
-      Analise o risco preditivo de cada matéria. Use o cruzamento de erros e esquecimento para priorizar reforços onde há deficiência.
-    * **🧠 Relatórios:**  
-      Faça a Reunião do CEO semanal comparando planejado x realizado. Meirelles exige auditoria para ajustar metas e corrigir a rota.
-    * **📊 Dashboard:**  
-      Visualize gráficos consolidados de horas diárias, fases e alertas do progresso global.
-    * **💾 Backup / Configurações:**  
-      Exporte o backup em JSON periodicamente. Proteja seus registros e garanta a integridade do seu histórico de preparação.
+    * **📚 Edital Verticalizado:** Cadastre o conteúdo programático para guiar o estudo ativo.
+    * **⚙️ Ajustar Ciclo:** Organize a ordem das disciplinas, blocos de tempo e disponibilidade diária.
+    * **⏱️ Executar Ciclo:** Utilize o cronômetro progressivo e registre cada bloco seguindo a rotação contínua.
+    * **🔄 Revisões & Caderno de Erros:** Mantenha a memória protegida contra a curva de esquecimento e audite suas falhas.
+    * **🧠 Relatórios & Dashboard:** Monitore horas semanais, mensais, totais e conduza sua Reunião do CEO semanal.
     """)
 
 
 # -----------------------------
-# 1. Dashboard 
+# 1. Dashboard
 # -----------------------------
 elif page == "📊 Dashboard":
     st.title("📊 Dashboard")
     weekly, monthly, total = kpi_periods()
-    c1, c2, c3 = st.columns(3)
+    
+    c1, c2, c3, c4 = st.columns(4)
     c1.metric("Horas — semana", f"{weekly:.1f} h")
     c2.metric("Horas — mês", f"{monthly:.1f} h")
-    c3.metric("Horas — total", f"{total:.1f} h")
+    c3.metric("Horas — total geral", f"{total:.1f} h")
+    c4.metric("Disciplinas ativas", len(get_active_subjects()))
     
+    st.divider()
+
+    df = session_dataframe()
+    if not df.empty:
+        st.subheader("📚 Consolidado de Horas por Disciplina")
+        subj_grouped = df.groupby("subject", as_index=False).agg(horas=("minutes", lambda x: x.sum()/60))
+        subj_grouped = subj_grouped.sort_values(by="horas", ascending=False)
+        
+        fig_subj = px.bar(
+            subj_grouped, 
+            x="horas", 
+            y="subject", 
+            orientation="h",
+            title="Total de Horas Líquidas por Disciplina",
+            text_auto=".1f",
+            color="horas",
+            color_continuous_scale="Teal"
+        )
+        fig_subj.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis_title="Horas", yaxis_title="Disciplina")
+        st.plotly_chart(fig_subj, use_container_width=True)
+        
+        st.divider()
+        
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            daily = df.groupby(pd.to_datetime(df["date"]).dt.date).agg(horas=("minutes", lambda x: x.sum()/60)).reset_index()
+            daily.columns = ["date", "horas"]
+            fig_line = px.line(daily, x="date", y="horas", markers=True, title="Horas líquidas por dia")
+            st.plotly_chart(fig_line, use_container_width=True)
+        with col_d2:
+            phase_grouped = df.groupby("phase", as_index=False).agg(horas=("minutes", lambda x: x.sum()/60))
+            phase_grouped["Fase Desc"] = phase_grouped["phase"].map(lambda p: f"Fase {p}")
+            fig_pie = px.pie(phase_grouped, names="Fase Desc", values="horas", title="Distribuição de Horas por Fase de Estudo", hole=0.4)
+            st.plotly_chart(fig_pie, use_container_width=True)
+    else:
+        st.info("Nenhum registro de estudo encontrado para exibir os gráficos do dashboard.")
+
     st.divider()
     
     st.subheader("🧠 Curva de Esquecimento (Alerta de Retenção)")
@@ -327,22 +352,6 @@ elif page == "📊 Dashboard":
         st.dataframe(df_alerts, hide_index=True, use_container_width=True)
     else:
         st.success("Tudo em dia! Nenhum tópico maduro esquecido há mais de 30 dias.")
-
-    st.divider()
-
-    df = session_dataframe()
-    if not df.empty:
-        col_d1, col_d2 = st.columns(2)
-        with col_d1:
-            daily = df.groupby(pd.to_datetime(df["date"]).dt.date).agg(horas=("minutes", lambda x: x.sum()/60)).reset_index()
-            daily.columns = ["date", "horas"]
-            fig_line = px.line(daily, x="date", y="horas", markers=True, title="Horas líquidas por dia")
-            st.plotly_chart(fig_line, use_container_width=True)
-        with col_d2:
-            phase_grouped = df.groupby("phase", as_index=False).agg(horas=("minutes", lambda x: x.sum()/60))
-            phase_grouped["Fase Desc"] = phase_grouped["phase"].map(lambda p: f"Fase {p}")
-            fig_pie = px.pie(phase_grouped, names="Fase Desc", values="horas", title="Distribuição de Horas por Fase de Estudo", hole=0.4)
-            st.plotly_chart(fig_pie, use_container_width=True)
 
 
 # -----------------------------
@@ -465,31 +474,39 @@ elif page == "⏱️ Executar Ciclo":
                                 elif t["status"] not in ["Concluído", "Assimilado/Concluído"]:
                                     t["status"] = "Lido/Estudado"
 
-                    if int(phase_num) == 3:
+                    # -------------------------------------------------------------
+                    # ESTRATÉGIA DINÂMICA DE REPETIÇÃO ESPAÇADA (Fases 2 e 3)
+                    # -------------------------------------------------------------
+                    if int(phase_num) in [2, 3] and questions > 0:
+                        block_acc = (correct / questions) * 100
+                        
+                        # Regra Dinâmica por Desempenho
+                        if block_acc < 70:
+                            intervals = [2, 7] # Baixo rendimento: reforço rápido
+                        elif block_acc < 90:
+                            intervals = [7, 21, 45] # Bom rendimento: intervalos padrão
+                        else:
+                            intervals = [30, 60] # Domínio total: avanço direto para o longo prazo
+                            
                         base_d = date.fromisoformat(session_date_str)
-                        intervals = [1, 7, 30, 60, 90]
                         target_topics = selected_topics if selected_topics else [f"Geral / {subject_sel}"]
+                        
                         for topic_name in target_topics:
-                            ja_possui_revisoes = any(
-                                r["subject"] == subject_sel and r["topic"] == topic_name 
-                                for r in st.session_state.data["revisoes"]
-                            )
-                            if not ja_possui_revisoes:
-                                for days_offset in intervals:
-                                    rev_date = base_d + timedelta(days=days_offset)
-                                    st.session_state.data["revisoes"].append({
-                                        "id": f"rev-{datetime.now().strftime('%Y%m%d%H%M%S%f')}-{days_offset}",
-                                        "subject": subject_sel,
-                                        "topic": topic_name,
-                                        "interval": f"{days_offset} dia(s)",
-                                        "due_date": rev_date.isoformat(),
-                                        "done": False,
-                                        "dismissed": False
-                                    })
+                            for days_offset in intervals:
+                                rev_date = base_d + timedelta(days=days_offset)
+                                st.session_state.data["revisoes"].append({
+                                    "id": f"rev-dyn-{datetime.now().strftime('%Y%m%d%H%M%S%f')}-{days_offset}",
+                                    "subject": subject_sel,
+                                    "topic": topic_name,
+                                    "interval": f"{days_offset} dia(s) [{block_acc:.0f}% acerto]",
+                                    "due_date": rev_date.isoformat(),
+                                    "done": False,
+                                    "dismissed": False
+                                })
 
                     advance_cycle(subject_sel)
                     reset_timer()
-                    st.success("Bloco registrado, ciclo avançado e agenda inteligente tratada!")
+                    st.success("Bloco registrado, ciclo avançado e agenda inteligente gerada por desempenho!")
                     st.rerun()
 
     else:
@@ -516,7 +533,7 @@ elif page == "⚙️ Ajustar Ciclo":
             },
             hide_index=True, use_container_width=True
         )
-        if st.button("💾 Salvar Ordem e Configurações"):
+        if st.button("💾 Salvar Ordem e Configurações de Disciplinas"):
             for _, row in edited_df.iterrows():
                 for s in st.session_state.data["subjects"]:
                     if s["name"] == row["name"]:
@@ -525,54 +542,90 @@ elif page == "⚙️ Ajustar Ciclo":
                         s["block_minutes"] = int(row["block_minutes"])
             st.session_state.data["subjects"].sort(key=lambda x: x["order"])
             persist()
-            st.success("Ciclo atualizado!")
+            st.success("Configurações e ordem salvas! A projeção foi atualizada.")
             st.rerun()
 
-    st.subheader("2. Disponibilidade e Projeção (Próximos 7 Dias)")
+    st.subheader("2. Disponibilidade Horária Diária (Próximos 7 Dias)")
     days_map = {"Monday": "Seg", "Tuesday": "Ter", "Wednesday": "Qua", "Thursday": "Qui", "Friday": "Sex", "Saturday": "Sáb", "Sunday": "Dom"}
-    cols = st.columns(7)
-    new_hours = {}
-    for i, (day_eng, day_pt) in enumerate(days_map.items()):
-        val = st.session_state.data["settings"]["daily_hours"].get(day_eng, 2.0)
-        new_hours[day_eng] = cols[i].number_input(day_pt, value=float(val), step=0.5, key=f"dh_{day_eng}")
     
-    if st.button("💾 Atualizar Horas Diárias"):
+    with st.form("availability_form"):
+        cols = st.columns(7)
+        new_hours = {}
+        for i, (day_eng, day_pt) in enumerate(days_map.items()):
+            val = st.session_state.data["settings"]["daily_hours"].get(day_eng, 2.0)
+            new_hours[day_eng] = cols[i].number_input(day_pt, value=float(val), step=0.5, key=f"dh_{day_eng}")
+        
+        save_hours = st.form_submit_button("💾 Atualizar Horas Diárias", use_container_width=True)
+
+    if save_hours:
         st.session_state.data["settings"]["daily_hours"] = new_hours
         persist()
-        st.success("Disponibilidade salva.")
+        st.success("Disponibilidade horária atualizada!")
         st.rerun()
 
-    st.markdown("#### Projeção do Ciclo")
+    st.markdown("---")
+    st.subheader("📅 Projeção Sequencial do Ciclo (Próximos 7 Dias)")
+    st.caption("Caso tenha ocorrido algum imprevisto hoje, você pode definir manualmente qual matéria deve iniciar a projeção de hoje. Os dias seguintes seguirão automaticamente a sequência e o tempo configurado.")
+    
     active_subs = get_active_subjects()
     if not active_subs:
-        st.info("Ative pelo menos uma disciplina acima para ver a projeção.")
+        st.info("Ative pelo menos uma disciplina na seção 'Configurar Disciplinas e Ordem' acima para ver a projeção.")
     else:
+        active_names = [s["name"] for s in active_subs]
+        
+        current_global_idx = st.session_state.data.get("cycle_index", 0) % len(active_subs)
+        default_selected_curr = active_subs[current_global_idx]["name"]
+        
+        col_sel_p, col_btn_p = st.columns([2, 1])
+        with col_sel_p:
+            selected_start_subject = st.selectbox(
+                "🎯 Definir Matéria Inicial para Hoje (Ponteiro do Ciclo)",
+                active_names,
+                index=active_names.index(default_selected_curr) if default_selected_curr in active_names else 0,
+                key="proj_start_subj_sel"
+            )
+        with col_btn_p:
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("📌 Fixar e Atualizar Projeção", use_container_width=True):
+                new_idx = active_names.index(selected_start_subject)
+                st.session_state.data["cycle_index"] = new_idx
+                persist()
+                st.success("Ponteiro do ciclo atualizado!")
+                st.rerun()
+
         proj_date = date.today()
-        current_idx = st.session_state.data.get("cycle_index", 0) % len(active_subs)
+        current_idx = active_names.index(selected_start_subject)
         
         proj_data = []
+        current_daily_hours = st.session_state.data["settings"]["daily_hours"]
+        
         for _ in range(7):
             day_name_eng = proj_date.strftime("%A")
-            avail_mins = new_hours.get(day_name_eng, 0) * 60
-            day_blocks = []
+            avail_hours = current_daily_hours.get(day_name_eng, 0.0)
+            avail_mins = avail_hours * 60
+            day_subjects = []
             
-            while avail_mins > 0:
+            while avail_mins > 30 and active_subs:
                 nxt_s = active_subs[current_idx]
-                if avail_mins >= nxt_s["block_minutes"] * 0.5:
-                    day_blocks.append(f"{nxt_s['name']} ({nxt_s['block_minutes']}m)")
-                    avail_mins -= nxt_s["block_minutes"]
-                    current_idx = (current_idx + 1) % len(active_subs)
-                else:
-                    break
+                block_len = nxt_s.get("block_minutes", 60)
+                day_subjects.append(nxt_s['name'])
+                avail_mins -= block_len
+                current_idx = (current_idx + 1) % len(active_subs)
             
-            proj_data.append({"Data": proj_date.strftime("%d/%m (%a)"), "Blocos Planejados": " ➔ ".join(day_blocks) if day_blocks else "Descanso/Livre"})
+            seq_text = ", ".join(day_subjects) if day_subjects else "Dia de Descanso / Livre"
+            
+            proj_data.append({
+                "Data": proj_date.strftime("%d/%m/%Y (%a)"),
+                "Horas Previstas": f"{avail_hours:.1f} h",
+                "Matérias na Sequência": seq_text
+            })
             proj_date += timedelta(days=1)
             
-        st.table(pd.DataFrame(proj_data))
+        st.dataframe(pd.DataFrame(proj_data), hide_index=True, use_container_width=True)
 
 
 # -----------------------------
-# 4. Edital Verticalizado (Com adição de nova disciplina)
+# 4. Edital Verticalizado
 # -----------------------------
 elif page == "📚 Edital Verticalizado":
     st.title("📚 Edital Verticalizado")
@@ -629,7 +682,6 @@ elif page == "📚 Edital Verticalizado":
                         "active": True,
                         "block_minutes": int(new_sub_mins)
                     })
-                    # Adiciona um tópico padrão inicial para a disciplina
                     st.session_state.data["topics"].append({
                         "id": f"top-{now_iso()}",
                         "subject": new_sub_name.strip(),
@@ -736,30 +788,33 @@ elif page == "📋 Planilha de Controle":
 
 
 # -----------------------------
-# 6. Resumos
+# 6. Resumos & Mapas Mentais
 # -----------------------------
-elif page == "📝 Resumos":
-    st.title("📝 Seção de Resumos Manuscritos")
-    st.caption("Organize seus resumos fotografados por disciplina e tópico.")
+elif page == "📝 Resumos & Mapas Mentais":
+    st.title("📝 Seção de Resumos & Mapas Mentais")
+    st.caption("Organize seus resumos e esquemas visuais fotografados por disciplina e tópico.")
 
-    subject_res = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]], key="res_subj")
+    subject_res = st.selectbox("Disciplina (para cadastro)", [s["name"] for s in st.session_state.data["subjects"]], key="res_subj")
     topics_for_res = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == subject_res and t["name"] != "Adicionar tópico do edital"]
 
     with st.form("resumo_form"):
-        c1, c2 = st.columns(2)
+        c1, c2, c3 = st.columns(3)
         with c1:
-            topic_res = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_for_res, key="res_top")
+            item_type = st.selectbox("Tipo de Material", ["Resumo", "Mapa Mental"], key="res_type")
         with c2:
-            res_title = st.text_input("Título / Descrição do Resumo", placeholder="Ex.: Fórmulas de Transformadores")
-            uploaded_res_img = st.file_uploader("Carregar foto do resumo (PNG/JPG)", type=["png", "jpg", "jpeg"], key="res_file")
+            topic_res = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_for_res, key="res_top")
+        with c3:
+            res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas ou Esquema Geral")
+            
+        uploaded_res_img = st.file_uploader("Carregar foto (PNG/JPG)", type=["png", "jpg", "jpeg"], key="res_file")
 
-        save_resumo = st.form_submit_button("💾 Salvar Resumo", use_container_width=True)
+        save_resumo = st.form_submit_button("💾 Salvar Registro", use_container_width=True)
 
     if save_resumo:
         if not res_title.strip():
-            st.error("Informe um título ou descrição para o resumo.")
+            st.error("Informe um título ou descrição.")
         elif uploaded_res_img is None:
-            st.error("Por favor, envie a foto do resumo.")
+            st.error("Por favor, envie a foto.")
         else:
             res_filename = f"resumo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_res_img.name}"
             res_path = RESUMOS_DIR / res_filename
@@ -769,46 +824,126 @@ elif page == "📝 Resumos":
             st.session_state.data["resumos"].append({
                 "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
                 "date": date.today().isoformat(),
+                "type": item_type,
                 "subject": subject_res,
                 "topic": topic_res if topic_res != "Nenhum" else "",
                 "title": res_title.strip(),
                 "image_filename": res_filename
             })
             persist()
-            st.success("Resumo cadastrado com sucesso!")
+            st.success("Registro cadastrado com sucesso!")
             st.rerun()
 
     st.divider()
     resumos_list = st.session_state.data.get("resumos", [])
     if resumos_list:
-        st.subheader("📚 Resumos Cadastrados")
-        res_df_data = []
-        for r in resumos_list:
+        rdf = pd.DataFrame(resumos_list)
+        if "type" not in rdf.columns: rdf["type"] = "Resumo"
+        st.metric("Total de itens cadastrados", len(rdf))
+
+        rf1, rf2, rf3 = st.columns(3)
+        with rf1:
+            type_filter = st.selectbox("Filtrar tipo", ["Todos", "Resumo", "Mapa Mental"], key="res_tf_type")
+        with rf2:
+            res_subj_filter = st.selectbox("Filtrar disciplina", ["Todas"] + sorted(rdf["subject"].unique().tolist()), key="res_sf")
+        
+        available_res_topics = ["Todos"]
+        temp_rdf = rdf if res_subj_filter == "Todas" else rdf[rdf["subject"] == res_subj_filter]
+        sub_res_tops = temp_rdf["topic"].dropna().unique().tolist()
+        available_res_topics += sorted([t for t in sub_res_tops if t and t.strip()])
+
+        with rf3:
+            res_top_filter = st.selectbox("Filtrar tópico (opcional)", available_res_topics, key="res_tf")
+
+        view_res = rdf.copy()
+        if type_filter != "Todos":
+            view_res = view_res[view_res["type"] == type_filter]
+        if res_subj_filter != "Todas":
+            view_res = view_res[view_res["subject"] == res_subj_filter]
+        if res_top_filter != "Todos":
+            view_res = view_res[view_res["topic"] == res_top_filter]
+
+        res_table_rows = []
+        for _, r in view_res.iterrows():
             img_fn = r.get("image_filename", "")
             img_link = f"resumos/{img_fn}" if img_fn else ""
-            res_df_data.append({
+            res_table_rows.append({
+                "id": r["id"],
                 "Data": r["date"],
+                "Tipo": r.get("type", "Resumo"),
                 "Disciplina": r["subject"],
                 "Tópico": r.get("topic", ""),
                 "Título": r["title"],
-                "Imagem (Link)": img_link
+                "Imagem": img_link,
+                "Excluir": False
             })
-        
-        st.dataframe(pd.DataFrame(res_df_data), use_container_width=True, hide_index=True)
 
-        valid_res_previews = [
-            r.get("image_filename") for r in resumos_list 
-            if r.get("image_filename") and not pd.isna(r.get("image_filename")) and (RESUMOS_DIR / str(r.get("image_filename"))).exists()
-        ]
-        if valid_res_previews:
-            st.markdown("#### 🖼️ Visualizador de Resumos")
-            sel_res_prev = st.selectbox("Selecione um resumo para exibir a foto", valid_res_previews, key="sel_res")
-            if sel_res_prev:
-                p_path = RESUMOS_DIR / sel_res_prev
-                if p_path.exists():
-                    st.image(str(p_path), caption=sel_res_prev, use_container_width=True)
+        df_res_view = pd.DataFrame(res_table_rows)
+        edited_res_table = st.data_editor(
+            df_res_view,
+            column_config={
+                "id": None,
+                "Data": st.column_config.TextColumn("Data", disabled=True),
+                "Tipo": st.column_config.TextColumn("Tipo", disabled=True),
+                "Disciplina": st.column_config.TextColumn("Disciplina", disabled=True),
+                "Tópico": st.column_config.TextColumn("Tópico", disabled=True),
+                "Título": st.column_config.TextColumn("Título", disabled=True),
+                "Imagem": st.column_config.TextColumn("Caminho", disabled=True),
+                "Excluir": st.column_config.CheckboxColumn("Excluir?")
+            },
+            hide_index=True,
+            use_container_width=True,
+            key="resumos_editor"
+        )
+
+        if st.button("💾 Sincronizar e Excluir Marcados (Resumos/Mapas)"):
+            ids_to_del = [row["id"] for _, row in edited_res_table.iterrows() if row["Excluir"]]
+            if ids_to_del:
+                for r_item in st.session_state.data["resumos"]:
+                    if r_item["id"] in ids_to_del:
+                        img_fn = r_item.get("image_filename")
+                        if img_fn:
+                            f_path = RESUMOS_DIR / img_fn
+                            if f_path.exists():
+                                try:
+                                    f_path.unlink()
+                                except Exception:
+                                    pass
+
+                st.session_state.data["resumos"] = [r for r in st.session_state.data["resumos"] if r["id"] not in ids_to_del]
+                persist()
+                st.success("Itens e arquivos de imagem associados foram excluídos com sucesso!")
+                st.rerun()
+
+        is_res_filtered = (type_filter != "Todos") or (res_subj_filter != "Todas") or (res_top_filter != "Todos")
+        if is_res_filtered:
+            filtered_res_files = [
+                r.get("image_filename") for _, r in view_res.iterrows() 
+                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and (RESUMOS_DIR / str(r.get("image_filename"))).exists()
+            ]
+            st.markdown(f"#### 🖼️ Prévia em Sequência dos Itens Filtrados ({len(filtered_res_files)} encontrados)")
+            if filtered_res_files:
+                for img_fn in filtered_res_files:
+                    p_path = RESUMOS_DIR / img_fn
+                    if p_path.exists():
+                        st.image(str(p_path), caption=img_fn, use_container_width=True)
+                        st.divider()
+            else:
+                st.info("Nenhuma imagem anexada nos registros que correspondem a estes filtros.")
+        else:
+            valid_res_previews = [
+                r.get("image_filename") for r in resumos_list 
+                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and (RESUMOS_DIR / str(r.get("image_filename"))).exists()
+            ]
+            if valid_res_previews:
+                st.markdown("#### 🖼️ Visualizador")
+                sel_res_prev = st.selectbox("Selecione um item para exibir a foto", valid_res_previews, key="sel_res")
+                if sel_res_prev:
+                    p_path = RESUMOS_DIR / sel_res_prev
+                    if p_path.exists():
+                        st.image(str(p_path), caption=sel_res_prev, use_container_width=True)
     else:
-        st.info("Nenhum resumo cadastrado até o momento.")
+        st.info("Nenhum resumo ou mapa mental cadastrado até o momento.")
 
 
 # -----------------------------
@@ -816,7 +951,7 @@ elif page == "📝 Resumos":
 # -----------------------------
 elif page == "🔄 Revisões Espaçadas":
     st.title("🔄 Controle de Revisões Espaçadas")
-    st.caption("Agenda automatizada de revisões (Fase 3 gera marcos de 1, 7, 30, 60 e 90 dias apenas no primeiro ciclo do tópico).")
+    st.caption("Agenda inteligente: os marcos de revisão são gerados dinamicamente pelas Fases 2 e 3 com base no seu percentual de acerto.")
 
     with st.expander("➕ Adicionar Revisão Manual Avulsa"):
         m_sub = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]], key="m_rev_sub")
@@ -912,7 +1047,7 @@ elif page == "❌ Caderno de Erros":
     st.title("❌ Caderno de Erros")
     st.caption("Registre o motivo do erro, vincule opcionalmente a um tópico, anexe imagem e salve.")
 
-    subject = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]])
+    subject = st.selectbox("Disciplina (para cadastro)", [s["name"] for s in st.session_state.data["subjects"]])
     topics_for_err = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == subject and t["name"] != "Adicionar tópico do edital"]
 
     with st.form("error_form"):
@@ -960,15 +1095,28 @@ elif page == "❌ Caderno de Erros":
         edf = pd.DataFrame(errors)
         st.metric("Total de erros registrados", len(edf))
 
-        f1, f2 = st.columns(2)
+        f1, f2, f3 = st.columns(3)
         with f1:
             subject_filter = st.selectbox("Filtrar disciplina", ["Todas"] + sorted(edf["subject"].unique().tolist()))
+        
+        available_topics_filter = ["Todos"]
+        if subject_filter != "Todas":
+            sub_topics = edf[edf["subject"] == subject_filter]["topic"].dropna().unique().tolist()
+            available_topics_filter += sorted([t for t in sub_topics if t and t.strip()])
+        else:
+            all_tops = edf["topic"].dropna().unique().tolist()
+            available_topics_filter += sorted([t for t in all_tops if t and t.strip()])
+
         with f2:
+            topic_filter = st.selectbox("Filtrar tópico (opcional)", available_topics_filter)
+        with f3:
             reason_filter = st.selectbox("Filtrar motivo", ["Todos"] + sorted(edf["reason"].unique().tolist()))
 
         view = edf.copy()
         if subject_filter != "Todas":
             view = view[view["subject"] == subject_filter]
+        if topic_filter != "Todos":
+            view = view[view["topic"] == topic_filter]
         if reason_filter != "Todos":
             view = view[view["reason"] == reason_filter]
 
@@ -981,6 +1129,7 @@ elif page == "❌ Caderno de Erros":
                 img_link = f"imagens/{img_fn}"
                 
             display_records.append({
+                "id": r["id"],
                 "Data": r["date"],
                 "Disciplina": r["subject"],
                 "Tópico": r.get("topic", ""),
@@ -988,24 +1137,78 @@ elif page == "❌ Caderno de Erros":
                 "Prioridade": r["priority"],
                 "Resumo": r["statement"],
                 "Solução": r["solution"],
-                "Imagem (Link)": img_link
+                "Imagem": img_link,
+                "Excluir": False
             })
 
         view_df = pd.DataFrame(display_records)
-        st.dataframe(view_df, use_container_width=True, hide_index=True)
+        edited_error_table = st.data_editor(
+            view_df,
+            column_config={
+                "id": None,
+                "Data": st.column_config.TextColumn("Data", disabled=True),
+                "Disciplina": st.column_config.TextColumn("Disciplina", disabled=True),
+                "Tópico": st.column_config.TextColumn("Tópico", disabled=True),
+                "Motivo": st.column_config.TextColumn("Motivo", disabled=True),
+                "Prioridade": st.column_config.TextColumn("Prioridade", disabled=True),
+                "Resumo": st.column_config.TextColumn("Resumo", disabled=True),
+                "Solução": st.column_config.TextColumn("Solução", disabled=True),
+                "Imagem": st.column_config.TextColumn("Caminho", disabled=True),
+                "Excluir": st.column_config.CheckboxColumn("Excluir?")
+            },
+            hide_index=True,
+            use_container_width=True,
+            key="errors_editor"
+        )
+
+        if st.button("💾 Sincronizar e Excluir Marcados (Erros)"):
+            err_ids_to_del = [row["id"] for _, row in edited_error_table.iterrows() if row["Excluir"]]
+            if err_ids_to_del:
+                for err_item in st.session_state.data["errors"]:
+                    if err_item["id"] in err_ids_to_del:
+                        img_fn = err_item.get("image_filename")
+                        if img_fn:
+                            f_path = IMAGES_DIR / img_fn
+                            if f_path.exists():
+                                try:
+                                    f_path.unlink()
+                                except Exception:
+                                    pass
+
+                st.session_state.data["errors"] = [e for e in st.session_state.data["errors"] if e["id"] not in err_ids_to_del]
+                persist()
+                st.success("Erros e arquivos de imagem associados foram excluídos com sucesso!")
+                st.rerun()
         
-        img_previews = [
-            r.get("image_filename") for _, r in view.iterrows() 
-            if r.get("image_filename") and not pd.isna(r.get("image_filename")) and str(r.get("image_filename")).lower() != "nan" and (IMAGES_DIR / str(r.get("image_filename"))).exists()
-        ]
+        is_filtered = (subject_filter != "Todas") or (topic_filter != "Todos") or (reason_filter != "Todos")
         
-        if img_previews:
-            st.markdown("#### 🖼️ Prévia de imagens anexadas")
-            selected_preview = st.selectbox("Selecione um arquivo de imagem para visualizar", img_previews)
-            if selected_preview:
-                full_img_path = IMAGES_DIR / selected_preview
-                if full_img_path.exists():
-                    st.image(str(full_img_path), caption=selected_preview, use_container_width=True)
+        if is_filtered:
+            filtered_img_files = [
+                r.get("image_filename") for _, r in view.iterrows() 
+                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and str(r.get("image_filename")).lower() != "nan" and (IMAGES_DIR / str(r.get("image_filename"))).exists()
+            ]
+            
+            st.markdown(f"#### 🖼️ Prévia em Sequência das Imagens Filtradas ({len(filtered_img_files)} encontradas)")
+            if filtered_img_files:
+                for img_fn in filtered_img_files:
+                    full_img_path = IMAGES_DIR / img_fn
+                    if full_img_path.exists():
+                        st.image(str(full_img_path), caption=img_fn, use_container_width=True)
+                        st.divider()
+            else:
+                st.info("Nenhuma imagem anexada nos registros que correspondem a estes filtros.")
+        else:
+            img_previews = [
+                r.get("image_filename") for _, r in view.iterrows() 
+                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and str(r.get("image_filename")).lower() != "nan" and (IMAGES_DIR / str(r.get("image_filename"))).exists()
+            ]
+            if img_previews:
+                st.markdown("#### 🖼️ Prévia de imagens anexadas")
+                selected_preview = st.selectbox("Selecione um arquivo de imagem para visualizar", img_previews)
+                if selected_preview:
+                    full_img_path = IMAGES_DIR / selected_preview
+                    if full_img_path.exists():
+                        st.image(str(full_img_path), caption=selected_preview, use_container_width=True)
 
         if len(view):
             fig = px.bar(
@@ -1018,7 +1221,7 @@ elif page == "❌ Caderno de Erros":
 
 
 # -----------------------------
-# 9. Desempenho & Prioridades (Análise Preditiva)
+# 9. Desempenho & Prioridades
 # -----------------------------
 elif page == "📈 Desempenho & Prioridades":
     st.title("📈 Desempenho Geral & Análise Preditiva de Reforço")
@@ -1322,22 +1525,16 @@ elif page == "💾 Backup / Configurações":
             min_value=1.0, max_value=100.0, 
             value=float(st.session_state.data["settings"]["weekly_target_hours"]), step=0.5
         )
-        approval = st.number_input(
-            "Ano-meta para aprovação", 
-            min_value=2026, max_value=2050, 
-            value=int(st.session_state.data["settings"]["approval_year"])
-        )
         save_settings = st.form_submit_button("💾 Salvar configurações globais")
 
     if save_settings:
         st.session_state.data["settings"]["weekly_target_hours"] = float(weekly_target)
-        st.session_state.data["settings"]["approval_year"] = int(approval)
         persist()
         st.success("Configurações salvas.")
 
     st.divider()
     st.subheader("🧹 Limpeza Seletiva de Registros (Manutenção)")
-    st.caption("Utilize estas opções para zerar dados operacionais de teste sem perder as disciplinas do seu edital ou as configurações.")
+    st.caption("Utilize estas opções para zerar dados operacionais de teste sem perder as disciplinas do edital ou os arquivos anexos.")
 
     c_clean1, c_clean2 = st.columns(2)
     
@@ -1355,13 +1552,13 @@ elif page == "💾 Backup / Configurações":
         if st.button("🗑️ Zerar Caderno de Erros", use_container_width=True):
             st.session_state.data["errors"] = []
             persist()
-            st.success("Caderno de erros limpo com sucesso!")
+            st.success("Caderno de erros limpo com sucesso! (Arquivos de imagens preservados)")
             st.rerun()
 
-        if st.button("🗑️ Zerar Resumos", use_container_width=True):
+        if st.button("🗑️ Zerar Resumos & Mapas", use_container_width=True):
             st.session_state.data["resumos"] = []
             persist()
-            st.success("Resumos limpos com sucesso!")
+            st.success("Resumos limpos com sucesso! (Arquivos de imagens preservados)")
             st.rerun()
 
     with c_clean2:
@@ -1388,7 +1585,7 @@ elif page == "💾 Backup / Configurações":
                 t["accuracy"] = None
                 t["last_studied"] = None
             persist()
-            st.success("Todos os registros operacionais foram zerados (Disciplinas e Configurações preservadas).")
+            st.success("Todos os registros operacionais foram zerados (Disciplinas, Configurações e Arquivos Físicos preservados).")
             st.rerun()
 
     st.divider()
@@ -1521,67 +1718,3 @@ elif page == "🔔 Notificações":
             <p>Existem <b>{retention_count}</b> tópicos estudados que estão há mais de 30 dias sem nova interação.</p>
         </div><br>
         """, unsafe_allow_html=True)
-
-
-# -----------------------------
-# 13. Planilha de Controle
-# -----------------------------
-elif page == "📋 Planilha de Controle":
-    st.title("📋 Planilha de Controle do Edital")
-    st.caption("Visão consolidada por tópicos verticalizados com suporte à exclusão e edição direta.")
-
-    topics_list = st.session_state.data.get("topics", [])
-    if topics_list:
-        ctrl_rows = []
-        for t in topics_list:
-            if t["name"] == "Adicionar tópico do edital": 
-                continue
-            ctrl_rows.append({
-                "id": t["id"],
-                "Disciplina": t["subject"],
-                "Tópico": t["name"],
-                "Status": t.get("status", "Não iniciado"),
-                "Último Estudo": t.get("last_studied", "-"),
-                "% Acerto": t.get("accuracy", 0.0) if t.get("accuracy") is not None else 0.0,
-                "Excluir": False
-            })
-        
-        df_ctrl = pd.DataFrame(ctrl_rows)
-        if not df_ctrl.empty:
-            edited_ctrl = st.data_editor(
-                df_ctrl,
-                column_config={
-                    "id": None,
-                    "Disciplina": st.column_config.TextColumn("Disciplina", disabled=True),
-                    "Tópico": st.column_config.TextColumn("Tópico"),
-                    "Status": st.column_config.SelectboxColumn("Status", options=["Não iniciado", "Lido/Estudado", "Assimilado/Concluído", "Concluído"]),
-                    "Último Estudo": st.column_config.TextColumn("Último Estudo", disabled=True),
-                    "% Acerto": st.column_config.NumberColumn("% Acerto", format="%.1f %%", disabled=True),
-                    "Excluir": st.column_config.CheckboxColumn("Excluir?")
-                },
-                hide_index=True,
-                use_container_width=True,
-                key="control_sheet_editor"
-            )
-            
-            if st.button("💾 Sincronizar e Excluir Marcados"):
-                ids_to_delete = []
-                for _, row in edited_ctrl.iterrows():
-                    if row["Excluir"]:
-                        ids_to_delete.append(row["id"])
-                    else:
-                        for t in st.session_state.data["topics"]:
-                            if t["id"] == row["id"]:
-                                t["name"] = row["Tópico"]
-                                t["status"] = row["Status"]
-                
-                if ids_to_delete:
-                    st.session_state.data["topics"] = [t for t in st.session_state.data["topics"] if t["id"] not in ids_to_delete]
-                
-                persist()
-                st.success("Planilha sincronizada e itens removidos com sucesso!")
-                st.rerun()
-        else:
-            st.info("Nenhum tópico cadastrado nos editais.")
-    else:
-        st.info("Nenhum tópico cadastrado.")
