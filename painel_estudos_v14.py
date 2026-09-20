@@ -792,7 +792,7 @@ elif page == "📋 Planilha de Controle":
 # -----------------------------
 elif page == "📝 Resumos & Mapas Mentais":
     st.title("📝 Seção de Resumos & Mapas Mentais")
-    st.caption("Organize seus resumos e esquemas visuais fotografados por disciplina e tópico.")
+    st.caption("Organize seus resumos e esquemas visuais por disciplina e tópico (via texto direto, imagem ou ambos).")
 
     subject_res = st.selectbox("Disciplina (para cadastro)", [s["name"] for s in st.session_state.data["subjects"]], key="res_subj")
     topics_for_res = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == subject_res and t["name"] != "Adicionar tópico do edital"]
@@ -804,22 +804,28 @@ elif page == "📝 Resumos & Mapas Mentais":
         with c2:
             topic_res = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_for_res, key="res_top")
         with c3:
-            res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas ou Esquema Geral")
+            res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas de Curto-Circuito")
             
-        uploaded_res_img = st.file_uploader("Carregar foto (PNG/JPG)", type=["png", "jpg", "jpeg"], key="res_file")
+        # Novo campo para texto direto do resumo/mapa
+        res_content = st.text_area("Texto do Resumo / Anotação (Opcional se enviar imagem)", placeholder="Digite ou cole o texto do seu resumo, leis, fórmulas ou pontos-chave aqui...")
+        
+        # Upload de imagem opcional
+        uploaded_res_img = st.file_uploader("Ou Carregue uma foto/arquivo (PNG/JPG)", type=["png", "jpg", "jpeg"], key="res_file")
 
         save_resumo = st.form_submit_button("💾 Salvar Registro", use_container_width=True)
 
     if save_resumo:
         if not res_title.strip():
             st.error("Informe um título ou descrição.")
-        elif uploaded_res_img is None:
-            st.error("Por favor, envie a foto.")
+        elif not res_content.strip() and uploaded_res_img is None:
+            st.error("Você deve preencher o texto do resumo OU enviar uma imagem.")
         else:
-            res_filename = f"resumo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_res_img.name}"
-            res_path = RESUMOS_DIR / res_filename
-            with open(res_path, "wb") as f:
-                f.write(uploaded_res_img.getbuffer())
+            res_filename = ""
+            if uploaded_res_img is not None:
+                res_filename = f"resumo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_res_img.name}"
+                res_path = RESUMOS_DIR / res_filename
+                with open(res_path, "wb") as f:
+                    f.write(uploaded_res_img.getbuffer())
 
             st.session_state.data["resumos"].append({
                 "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
@@ -828,6 +834,7 @@ elif page == "📝 Resumos & Mapas Mentais":
                 "subject": subject_res,
                 "topic": topic_res if topic_res != "Nenhum" else "",
                 "title": res_title.strip(),
+                "content": res_content.strip(),
                 "image_filename": res_filename
             })
             persist()
@@ -839,6 +846,8 @@ elif page == "📝 Resumos & Mapas Mentais":
     if resumos_list:
         rdf = pd.DataFrame(resumos_list)
         if "type" not in rdf.columns: rdf["type"] = "Resumo"
+        if "content" not in rdf.columns: rdf["content"] = ""
+        
         st.metric("Total de itens cadastrados", len(rdf))
 
         rf1, rf2, rf3 = st.columns(3)
@@ -866,7 +875,7 @@ elif page == "📝 Resumos & Mapas Mentais":
         res_table_rows = []
         for _, r in view_res.iterrows():
             img_fn = r.get("image_filename", "")
-            img_link = f"resumos/{img_fn}" if img_fn else ""
+            img_link = f"resumos/{img_fn}" if img_fn else "Apenas Texto"
             res_table_rows.append({
                 "id": r["id"],
                 "Data": r["date"],
@@ -874,6 +883,7 @@ elif page == "📝 Resumos & Mapas Mentais":
                 "Disciplina": r["subject"],
                 "Tópico": r.get("topic", ""),
                 "Título": r["title"],
+                "Tem Texto?": "Sim" if r.get("content") else "Não",
                 "Imagem": img_link,
                 "Excluir": False
             })
@@ -888,7 +898,8 @@ elif page == "📝 Resumos & Mapas Mentais":
                 "Disciplina": st.column_config.TextColumn("Disciplina", disabled=True),
                 "Tópico": st.column_config.TextColumn("Tópico", disabled=True),
                 "Título": st.column_config.TextColumn("Título", disabled=True),
-                "Imagem": st.column_config.TextColumn("Caminho", disabled=True),
+                "Tem Texto?": st.column_config.TextColumn("Texto?", disabled=True),
+                "Imagem": st.column_config.TextColumn("Mídia", disabled=True),
                 "Excluir": st.column_config.CheckboxColumn("Excluir?")
             },
             hide_index=True,
@@ -912,39 +923,40 @@ elif page == "📝 Resumos & Mapas Mentais":
 
                 st.session_state.data["resumos"] = [r for r in st.session_state.data["resumos"] if r["id"] not in ids_to_del]
                 persist()
-                st.success("Itens e arquivos de imagem associados foram excluídos com sucesso!")
+                st.success("Itens selecionados foram excluídos com sucesso!")
                 st.rerun()
 
-        is_res_filtered = (type_filter != "Todos") or (res_subj_filter != "Todas") or (res_top_filter != "Todos")
-        if is_res_filtered:
-            filtered_res_files = [
-                r.get("image_filename") for _, r in view_res.iterrows() 
-                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and (RESUMOS_DIR / str(r.get("image_filename"))).exists()
-            ]
-            st.markdown(f"#### 🖼️ Prévia em Sequência dos Itens Filtrados ({len(filtered_res_files)} encontrados)")
-            if filtered_res_files:
-                for img_fn in filtered_res_files:
+        st.divider()
+        st.markdown("#### 🔍 Leitor & Visualizador de Resumos/Mapas")
+        
+        if not view_res.empty:
+            # Criar lista amigável para selecionar qual resumo ler/ver
+            resumo_options = view_res.apply(lambda row: f"[{row['type']}] {row['subject']} - {row['title']}", axis=1).tolist()
+            selected_resumo_label = st.selectbox("Selecione um item para exibir o conteúdo completo", resumo_options, key="sel_res_reader")
+            
+            if selected_resumo_label:
+                selected_idx = resumo_options.index(selected_resumo_label)
+                selected_row = view_res.iloc[selected_idx]
+                
+                st.markdown(f"### {selected_row['title']}")
+                st.caption(f"**Disciplina:** {selected_row['subject']} | **Tópico:** {selected_row.get('topic', 'Geral')} | **Data:** {selected_row['date']}")
+                
+                # Exibir texto se houver
+                if selected_row.get("content"):
+                    st.markdown("##### 📄 Texto do Resumo:")
+                    st.info(selected_row["content"])
+                
+                # Exibir imagem se houver
+                img_fn = selected_row.get("image_filename")
+                if img_fn and not pd.isna(img_fn):
                     p_path = RESUMOS_DIR / img_fn
                     if p_path.exists():
+                        st.markdown("##### 🖼️ Imagem / Anexo:")
                         st.image(str(p_path), caption=img_fn, use_container_width=True)
-                        st.divider()
-            else:
-                st.info("Nenhuma imagem anexada nos registros que correspondem a estes filtros.")
         else:
-            valid_res_previews = [
-                r.get("image_filename") for r in resumos_list 
-                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and (RESUMOS_DIR / str(r.get("image_filename"))).exists()
-            ]
-            if valid_res_previews:
-                st.markdown("#### 🖼️ Visualizador")
-                sel_res_prev = st.selectbox("Selecione um item para exibir a foto", valid_res_previews, key="sel_res")
-                if sel_res_prev:
-                    p_path = RESUMOS_DIR / sel_res_prev
-                    if p_path.exists():
-                        st.image(str(p_path), caption=sel_res_prev, use_container_width=True)
+            st.info("Nenhum item corresponde aos filtros selecionados.")
     else:
         st.info("Nenhum resumo ou mapa mental cadastrado até o momento.")
-
 
 # -----------------------------
 # 7. Revisões Espaçadas
