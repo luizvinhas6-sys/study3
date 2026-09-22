@@ -20,35 +20,35 @@
       "name": "Circuitos Elétricos",
       "type": "Específica",
       "order": 1,
-      "active": true,
+      "active": false,
       "block_minutes": 120
     },
     {
       "name": "Raciocínio Lógico e Matemático - RLM",
       "type": "Básica",
       "order": 3,
-      "active": true,
+      "active": false,
       "block_minutes": 120
     },
     {
       "name": "Eletromagnetismo",
       "type": "Específica",
       "order": 4,
-      "active": true,
+      "active": false,
       "block_minutes": 120
     },
     {
       "name": "Máquinas Elétricas",
       "type": "Específica",
       "order": 5,
-      "active": true,
+      "active": false,
       "block_minutes": 120
     },
     {
       "name": "NBRs",
       "type": "Específica",
       "order": 6,
-      "active": true,
+      "active": false,
       "block_minutes": 120
     },
     {
@@ -616,20 +616,63 @@
     }
   ],
   "study_sessions": [],
-  "errors": [],
-  "meetings": [],
-  "cycle_index": 0,
-  "resumos": [
+  "errors": [
     {
-      "id": "20260920182152170840",
-      "date": "2026-09-20",
-      "type": "Resumo",
+      "id": "20260921213218470751",
+      "date": "2026-09-21",
       "subject": "Língua Portuguesa",
       "topic": "",
-      "title": "Ordem em tópicos para aprendizado 4",
-      "content": "📁 PORTUGUÊS PARA CONCURSOS E EXAMES\n\n🧠 BLOCO 1: COMPREENSÃO E SENTIDO GLOBAL\n1. Noções Gerais de Compreensão e Interpretação de Texto\n- Identificação de ideias principais e secundárias\n- Inferências e deduções\n- Intenção comunicativa do autor\n\n2. Tipologia Textual e Gêneros Textuais\n- Tipos: Narrativo, Descritivo, Dissertativo (Expositivo/Argumentativo), Injuntivo\n- Gêneros: Notícia, artigo, e-mail, crônica, edital, etc.\n\n3. Semântica\n- Significação Contextual (Sinônimos, antônimos, polissemia)\n- Denotação (Sentido literal) vs. Conotação (Sentido figurado)\n\n🔗 BLOCO 2: CONSTRUÇÃO E ESTRUTURA DO TEXTO\n4. Coesão e Coerência\n- Coesão Referencial (Anáfora, catáfora) e Sequencial (Conectivos)\n- Coerência (Lógica interna, não-contradição)\n\n5. Intertextualidade\n- Explícita (Citação, paráfrase) e Implícita (Paródia, alusão, pastiche)\n\n6. Paragrafação\n- Tópico frasal (Ideia central)\n- Ampliação e desenvolvimento do parágrafo\n\n⚙️ BLOCO 3: A BASE GRAMATICAL (MORFOSSINTAXE)\n7. Morfologia (Classes de Palavras)\n- Variáveis: Substantivo, Adjetivo, Artigo, Pronome, Numeral, Verbo\n- Invariáveis: Advérbio, Preposição, Conjunção, Interjeição\n\n8. Sintaxe\n- Termos da Oração (Sujeito, Predicado, Complementos, Adjuntos)\n- Período Composto (Orações Coordenadas e Subordinadas)\n\n✍️ BLOCO 4: APLICAÇÃO PRÁTICA E ESTILÍSTICA\n9. Emprego de Sinais de Pontuação\n- Uso da Vírgula (separação de termos sintáticos)\n- Ponto e vírgula, dois-pontos, travessões\n\n10. Redação (Reescritura de Texto)\n- Processos de Retextualização (oralidade vs. escrita)\n- Substituição de termos sem alterar o sentido ou a gramática\n\n11. Funções da Linguagem\n- Emotiva/Expressiva, Apelativa/Conativa, Referencial/Denotativa\n- Metalinguística, Fática e Poética\n\n12. Figuras de Linguagem\n- Figuras de Palavras/Tropo (Metáfora, metonímia, comparação)\n- Figuras de Pensamento e Sintaxe (Antítese, ironia, hipérbole)\n\n🌍 BLOCO 5: ADEQUAÇÃO E NORMA\n13. Variação Linguística e Multimodalidade\n- Variações (Geográfica, social, histórica, situacional/formal e informal)\n- Multimodalidade (Combinação de linguagem verbal e não-verbal)\n\n14. Ortografia, Grafia e Novo Acordo\n- Emprego de letras (K, W, Y, H, etc.)\n- Acentuação gráfica\n- Hífen e regras gerais do Acordo Ortográfico",
+      "reason": "Falta de Teoria",
+      "statement": "assim assado",
+      "solution": "era isso",
+      "priority": "Alta",
       "image_filename": ""
+    },
+    {
+      "id": "20260921213258445410",
+      "date": "2026-09-21",
+      "subject": "Língua Portuguesa",
+      "topic": "",
+      "reason": "Pegadinha",
+      "statement": "assim assado assim assado assim assado assim assado assim assado assim assado assim assado \nassim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado v",
+      "solution": "era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso \nera isso era isso era isso era isso era isso era isso era isso era isso era isso \nera isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso",
+      "priority": "Alta",
+      "image_filename": ""
+    },
+    {
+      "id": "20260921214107742545",
+      "date": "2026-09-21",
+      "subject": "Língua Portuguesa",
+      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "reason": "Conceito confundido",
+      "statement": "isso",
+      "solution": "assado",
+      "priority": "Alta",
+      "image_filename": "erro_20260921214107_www.passeidireto.com_arquivo_52608188_sistema-supervisorio (3).png"
+    },
+    {
+      "id": "20260921214124437203",
+      "date": "2026-09-21",
+      "subject": "Língua Portuguesa",
+      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "reason": "Conceito confundido",
+      "statement": "isso",
+      "solution": "assado",
+      "priority": "Alta",
+      "image_filename": "erro_20260921214124_www.passeidireto.com_arquivo_52608188_sistema-supervisorio (3).png"
+    },
+    {
+      "id": "20260921214150911547",
+      "date": "2026-09-21",
+      "subject": "Circuitos Elétricos",
+      "topic": "",
+      "reason": "Conceito confundido",
+      "statement": "isso",
+      "solution": "assado",
+      "priority": "Alta",
+      "image_filename": "erro_20260921214150_www.passeidireto.com_arquivo_52608188_sistema-supervisorio (3).png"
     }
   ],
-  "revisoes": []
+  "cycle_index": 0,
+  "reviews": []
 }

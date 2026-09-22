@@ -1057,56 +1057,60 @@ elif page == "🔄 Revisões Espaçadas":
 # -----------------------------
 elif page == "❌ Caderno de Erros":
     st.title("❌ Caderno de Erros")
-    st.caption("Registre o motivo do erro, vincule opcionalmente a um tópico, anexe imagem e salve.")
+    st.caption("Registre o motivo do erro, vincule opcionalmente a um tópico, anexe imagem e consulte seus pontos críticos de forma limpa e prática.")
 
-    subject = st.selectbox("Disciplina (para cadastro)", [s["name"] for s in st.session_state.data["subjects"]])
-    topics_for_err = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == subject and t["name"] != "Adicionar tópico do edital"]
+    # Formulário de Cadastro
+    with st.expander("➕ Adicionar Novo Erro"):
+        subject = st.selectbox("Disciplina (para cadastro)", [s["name"] for s in st.session_state.data["subjects"]], key="err_sub_cad")
+        topics_for_err = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == subject and t["name"] != "Adicionar tópico do edital"]
 
-    with st.form("error_form"):
-        c1, c2 = st.columns(2)
-        with c1:
-            topic_choice = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_for_err)
-            reason = st.selectbox("Motivo do erro", ERROR_REASONS)
-            priority = st.selectbox("Prioridade", ["Alta", "Média", "Baixa"])
-        with c2:
-            statement = st.text_area("Resumo da questão / ponto crítico")
-            solution = st.text_area("Anotação da solução / aprendizado")
-            uploaded_img = st.file_uploader("Anexar imagem da questão (opcional)", type=["png", "jpg", "jpeg"])
+        with st.form("error_form"):
+            c1, c2 = st.columns(2)
+            with c1:
+                topic_choice = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_for_err)
+                reason = st.selectbox("Motivo do erro", ERROR_REASONS)
+                priority = st.selectbox("Prioridade", ["Alta", "Média", "Baixa"])
+            with c2:
+                statement = st.text_area("Resumo da questão / ponto crítico")
+                solution = st.text_area("Anotação da solução / aprendizado")
+                uploaded_img = st.file_uploader("Anexar imagem da questão (opcional)", type=["png", "jpg", "jpeg"])
 
-        add_error = st.form_submit_button("❌ Registrar erro", use_container_width=True)
+            add_error = st.form_submit_button("❌ Registrar erro", use_container_width=True)
 
-    if add_error:
-        if not statement.strip():
-            st.error("Informe pelo menos o resumo ou enunciado no ponto crítico.")
-        else:
-            img_filename = ""
-            if uploaded_img is not None:
-                img_filename = f"erro_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_img.name}"
-                img_path = IMAGES_DIR / img_filename
-                with open(img_path, "wb") as f:
-                    f.write(uploaded_img.getbuffer())
+        if add_error:
+            if not statement.strip():
+                st.error("Informe pelo menos o resumo ou enunciado no ponto crítico.")
+            else:
+                img_filename = ""
+                if uploaded_img is not None:
+                    img_filename = f"erro_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_img.name}"
+                    img_path = IMAGES_DIR / img_filename
+                    with open(img_path, "wb") as f:
+                        f.write(uploaded_img.getbuffer())
 
-            st.session_state.data["errors"].append({
-                "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
-                "date": date.today().isoformat(),
-                "subject": subject,
-                "topic": topic_choice if topic_choice != "Nenhum" else "",
-                "reason": reason,
-                "statement": statement.strip(),
-                "solution": solution.strip(),
-                "priority": priority,
-                "image_filename": img_filename
-            })
-            persist()
-            st.success("Erro registrado no caderno com sucesso!")
-            st.rerun()
+                st.session_state.data["errors"].append({
+                    "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
+                    "date": date.today().isoformat(),
+                    "subject": subject,
+                    "topic": topic_choice if topic_choice != "Nenhum" else "",
+                    "reason": reason,
+                    "statement": statement.strip(),
+                    "solution": solution.strip(),
+                    "priority": priority,
+                    "image_filename": img_filename
+                })
+                persist()
+                st.success("Erro registrado no caderno com sucesso!")
+                st.rerun()
 
     st.divider()
     errors = st.session_state.data.get("errors", [])
+    
     if errors:
         edf = pd.DataFrame(errors)
         st.metric("Total de erros registrados", len(edf))
 
+        # Filtros organizados
         f1, f2, f3 = st.columns(3)
         with f1:
             subject_filter = st.selectbox("Filtrar disciplina", ["Todas"] + sorted(edf["subject"].unique().tolist()))
@@ -1132,102 +1136,74 @@ elif page == "❌ Caderno de Erros":
         if reason_filter != "Todos":
             view = view[view["reason"] == reason_filter]
 
-        display_records = []
-        for _, r in view.iterrows():
-            img_fn = r.get("image_filename", "")
-            if not img_fn or pd.isna(img_fn) or str(img_fn).lower() == "nan":
-                img_link = ""
-            else:
-                img_link = f"imagens/{img_fn}"
-                
-            display_records.append({
-                "id": r["id"],
-                "Data": r["date"],
-                "Disciplina": r["subject"],
-                "Tópico": r.get("topic", ""),
-                "Motivo": r["reason"],
-                "Prioridade": r["priority"],
-                "Resumo": r["statement"],
-                "Solução": r["solution"],
-                "Imagem": img_link,
-                "Excluir": False
-            })
+        st.markdown(f"### 📋 Registros Filtrados ({len(view)})")
+        st.caption("Clique em um item abaixo para expandir e ler o enunciado completo, a solução e ver a imagem anexada sem problemas de rolagem.")
 
-        view_df = pd.DataFrame(display_records)
-        edited_error_table = st.data_editor(
-            view_df,
-            column_config={
-                "id": None,
-                "Data": st.column_config.TextColumn("Data", disabled=True),
-                "Disciplina": st.column_config.TextColumn("Disciplina", disabled=True),
-                "Tópico": st.column_config.TextColumn("Tópico", disabled=True),
-                "Motivo": st.column_config.TextColumn("Motivo", disabled=True),
-                "Prioridade": st.column_config.TextColumn("Prioridade", disabled=True),
-                "Resumo": st.column_config.TextColumn("Resumo", disabled=True),
-                "Solução": st.column_config.TextColumn("Solução", disabled=True),
-                "Imagem": st.column_config.TextColumn("Caminho", disabled=True),
-                "Excluir": st.column_config.CheckboxColumn("Excluir?")
-            },
-            hide_index=True,
-            use_container_width=True,
-            key="errors_editor"
-        )
-
-        if st.button("💾 Sincronizar e Excluir Marcados (Erros)"):
-            err_ids_to_del = [row["id"] for _, row in edited_error_table.iterrows() if row["Excluir"]]
-            if err_ids_to_del:
-                for err_item in st.session_state.data["errors"]:
-                    if err_item["id"] in err_ids_to_del:
-                        img_fn = err_item.get("image_filename")
-                        if img_fn:
-                            f_path = IMAGES_DIR / img_fn
-                            if f_path.exists():
-                                try:
-                                    f_path.unlink()
-                                except Exception:
-                                    pass
-
-                st.session_state.data["errors"] = [e for e in st.session_state.data["errors"] if e["id"] not in err_ids_to_del]
-                persist()
-                st.success("Erros e arquivos de imagem associados foram excluídos com sucesso!")
-                st.rerun()
-        
-        is_filtered = (subject_filter != "Todas") or (topic_filter != "Todos") or (reason_filter != "Todos")
-        
-        if is_filtered:
-            filtered_img_files = [
-                r.get("image_filename") for _, r in view.iterrows() 
-                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and str(r.get("image_filename")).lower() != "nan" and (IMAGES_DIR / str(r.get("image_filename"))).exists()
-            ]
-            
-            st.markdown(f"#### 🖼️ Prévia em Sequência das Imagens Filtradas ({len(filtered_img_files)} encontradas)")
-            if filtered_img_files:
-                for img_fn in filtered_img_files:
-                    full_img_path = IMAGES_DIR / img_fn
-                    if full_img_path.exists():
-                        st.image(str(full_img_path), caption=img_fn, use_container_width=True)
-                        st.divider()
-            else:
-                st.info("Nenhuma imagem anexada nos registros que correspondem a estes filtros.")
+        if view.empty:
+            st.info("Nenhum erro corresponde aos filtros selecionados.")
         else:
-            img_previews = [
-                r.get("image_filename") for _, r in view.iterrows() 
-                if r.get("image_filename") and not pd.isna(r.get("image_filename")) and str(r.get("image_filename")).lower() != "nan" and (IMAGES_DIR / str(r.get("image_filename"))).exists()
-            ]
-            if img_previews:
-                st.markdown("#### 🖼️ Prévia de imagens anexadas")
-                selected_preview = st.selectbox("Selecione um arquivo de imagem para visualizar", img_previews)
-                if selected_preview:
-                    full_img_path = IMAGES_DIR / selected_preview
-                    if full_img_path.exists():
-                        st.image(str(full_img_path), caption=selected_preview, use_container_width=True)
+            # Layout em Cartões Expansíveis (Evita estourar a tela com barras horizontais)
+            for _, r in view.iterrows():
+                err_id = r["id"]
+                data_reg = r["date"]
+                subj = r["subject"]
+                top = r.get("topic", "Geral")
+                motivo = r["reason"]
+                prio = r["priority"]
+                resumo = r["statement"]
+                solucao = r["solution"]
+                img_fn = r.get("image_filename", "")
 
-        if len(view):
-            fig = px.bar(
-                view.groupby("reason", as_index=False).size().rename(columns={"size": "Quantidade"}),
-                x="reason", y="Quantidade", title="Erros por motivo"
-            )
-            st.plotly_chart(fig, use_container_width=True)
+                # Ícone de prioridade para destaque visual rápido
+                prio_icon = "🔴" if prio == "Alta" else "🟡" if prio == "Média" else "🟢"
+                top_str = f" • Tópico: {top}" if top else ""
+                
+                expander_title = f"{prio_icon} [{subj}]{top_str} | Motivo: {motivo} ({data_reg})"
+                
+                with st.expander(expander_title):
+                    col_info1, col_info2 = st.columns([3, 1])
+                    with col_info1:
+                        st.markdown(f"**📌 Resumo / Ponto Crítico:**")
+                        st.info(resumo if resumo else "Nenhum resumo informado.")
+
+                        st.markdown(f"**💡 Solução / Aprendizado:**")
+                        st.success(solucao if solucao else "Nenhuma solução anotada.")
+
+                    with col_info2:
+                        st.markdown(f"**Prioridade:** {prio}")
+                        st.markdown(f"**Data:** {data_reg}")
+                        
+                        # Botão de exclusão individual prático dentro do próprio cartão
+                        if st.button("🗑️ Excluir este erro", key=f"del_err_{err_id}"):
+                            # Remove o arquivo de imagem associado, se existir
+                            if img_fn and not pd.isna(img_fn):
+                                f_path = IMAGES_DIR / img_fn
+                                if f_path.exists():
+                                    try:
+                                        f_path.unlink()
+                                    except Exception:
+                                        pass
+                            
+                            st.session_state.data["errors"] = [e for e in st.session_state.data["errors"] if e["id"] != err_id]
+                            persist()
+                            st.success("Erro excluído com sucesso!")
+                            st.rerun()
+
+                    # Exibir imagem anexada, se houver
+                    if img_fn and not pd.isna(img_fn) and str(img_fn).lower() != "nan":
+                        full_img_path = IMAGES_DIR / img_fn
+                        if full_img_path.exists():
+                            st.markdown("---")
+                            st.markdown("##### 🖼️ Imagem Anexada:")
+                            st.image(str(full_img_path), caption=img_fn, use_container_width=True)
+
+        st.divider()
+        # Gráfico estatístico consolidado mantido no final
+        fig = px.bar(
+            view.groupby("reason", as_index=False).size().rename(columns={"size": "Quantidade"}),
+            x="reason", y="Quantidade", title="Distribuição de Erros por Motivo (Filtro Atual)"
+        )
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("Seu caderno de erros está vazio.")
 
