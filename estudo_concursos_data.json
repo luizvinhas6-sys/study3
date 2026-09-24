@@ -616,63 +616,8 @@
     }
   ],
   "study_sessions": [],
-  "errors": [
-    {
-      "id": "20260921213218470751",
-      "date": "2026-09-21",
-      "subject": "Língua Portuguesa",
-      "topic": "",
-      "reason": "Falta de Teoria",
-      "statement": "assim assado",
-      "solution": "era isso",
-      "priority": "Alta",
-      "image_filename": ""
-    },
-    {
-      "id": "20260921213258445410",
-      "date": "2026-09-21",
-      "subject": "Língua Portuguesa",
-      "topic": "",
-      "reason": "Pegadinha",
-      "statement": "assim assado assim assado assim assado assim assado assim assado assim assado assim assado \nassim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado assim assado v",
-      "solution": "era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso \nera isso era isso era isso era isso era isso era isso era isso era isso era isso \nera isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso era isso",
-      "priority": "Alta",
-      "image_filename": ""
-    },
-    {
-      "id": "20260921214107742545",
-      "date": "2026-09-21",
-      "subject": "Língua Portuguesa",
-      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
-      "reason": "Conceito confundido",
-      "statement": "isso",
-      "solution": "assado",
-      "priority": "Alta",
-      "image_filename": "erro_20260921214107_www.passeidireto.com_arquivo_52608188_sistema-supervisorio (3).png"
-    },
-    {
-      "id": "20260921214124437203",
-      "date": "2026-09-21",
-      "subject": "Língua Portuguesa",
-      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
-      "reason": "Conceito confundido",
-      "statement": "isso",
-      "solution": "assado",
-      "priority": "Alta",
-      "image_filename": "erro_20260921214124_www.passeidireto.com_arquivo_52608188_sistema-supervisorio (3).png"
-    },
-    {
-      "id": "20260921214150911547",
-      "date": "2026-09-21",
-      "subject": "Circuitos Elétricos",
-      "topic": "",
-      "reason": "Conceito confundido",
-      "statement": "isso",
-      "solution": "assado",
-      "priority": "Alta",
-      "image_filename": "erro_20260921214150_www.passeidireto.com_arquivo_52608188_sistema-supervisorio (3).png"
-    }
-  ],
+  "errors": [],
   "cycle_index": 0,
-  "reviews": []
+  "reviews": [],
+  "resumos": []
 }

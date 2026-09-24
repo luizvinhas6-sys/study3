@@ -658,11 +658,14 @@ elif page == "▶️ Estudar":
 
 
 # ============================================================
-# 6. ❌ ERROS (Agrupado em Dois Níveis: Matéria ➔ Assunto)
+# 6. ❌ ERROS (Com Suporte a Anexos de Documentos e Imagens)
 # ============================================================
 elif page == "❌ Erros":
     st.title("❌ Caderno de Erros")
-    st.caption("Consulte seus pontos críticos organizados por matéria e assunto para estudar em sequência.")
+    st.caption("Consulte seus pontos críticos organizados por matéria e assunto, com suporte a anotações e arquivos de apoio.")
+
+    ANEXOS_DIR = Path("anexos_estudos")
+    ANEXOS_DIR.mkdir(exist_ok=True)
 
     with st.expander("➕ Adicionar Novo Erro"):
         err_subj = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]], key="err_s_cad")
@@ -672,21 +675,36 @@ elif page == "❌ Erros":
             err_top = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_err)
             err_reason = st.selectbox("Por que errei?", ERROR_REASONS)
             err_solution = st.text_area("O que preciso lembrar / Solução")
+            
+            # Campo de upload para documentos e imagens no Caderno de Erros
+            uploaded_err_file = st.file_uploader(
+                "Anexar arquivo de apoio (PDF, DOC/DOCX, PPT/PPTX ou Imagem)", 
+                type=["png", "jpg", "jpeg", "pdf", "doc", "docx", "ppt", "pptx"], 
+                key="err_file_up"
+            )
 
             if st.form_submit_button("❌ Registrar Erro", use_container_width=True):
-                if not err_solution.strip():
-                    st.error("Preencha a anotação do que precisa lembrar.")
+                if not err_solution.strip() and uploaded_err_file is None:
+                    st.error("Preencha a anotação do que precisa lembrar OU envie um arquivo de apoio.")
                 else:
+                    file_filename = ""
+                    if uploaded_err_file is not None:
+                        file_filename = f"erro_anexo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_err_file.name}"
+                        file_path = ANEXOS_DIR / file_filename
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_err_file.getbuffer())
+
                     st.session_state.data["errors"].append({
                         "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
                         "date": date.today().isoformat(),
                         "subject": err_subj,
                         "topic": err_top if err_top != "Nenhum" else "Geral",
                         "reason": err_reason,
-                        "solution": err_solution.strip()
+                        "solution": err_solution.strip(),
+                        "file_filename": file_filename  # Salva o nome do arquivo anexado
                     })
                     persist()
-                    st.success("Erro registrado no caderno!")
+                    st.success("Erro registrado no caderno com sucesso!")
                     st.rerun()
 
     st.divider()
@@ -724,14 +742,51 @@ elif page == "❌ Erros":
                             e_reas = r["reason"]
                             e_dt = r["date"]
                             e_sol = r["solution"]
+                            file_fn = r.get("file_filename", "")
 
                             col_card1, col_card2 = st.columns([5, 1])
                             with col_card1:
                                 st.markdown(f"**Motivo:** `{e_reas}` *(Registrado em {e_dt})*")
-                                st.info(e_sol)
+                                if e_sol:
+                                    st.info(e_sol)
+                                
+                                # Renderiza o anexo se houver
+                                if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
+                                    full_file_path = ANEXOS_DIR / file_fn
+                                    if full_file_path.exists():
+                                        ext = full_file_path.suffix.lower()
+                                        
+                                        # Se for imagem, exibe na tela
+                                        if ext in [".png", ".jpg", ".jpeg"]:
+                                            st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
+                                        
+                                        # Se for documento (PDF, Word, PPT), exibe botão de download
+                                        else:
+                                            icon_map = {".pdf": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                            icon = icon_map.get(ext, "📎")
+                                            orig_name = "_".join(file_fn.split("_")[3:]) if "_" in file_fn else file_fn
+                                            
+                                            with open(full_file_path, "rb") as file_bytes:
+                                                st.download_button(
+                                                    label=f"{icon} Baixar anexo: {orig_name}",
+                                                    data=file_bytes,
+                                                    file_name=orig_name,
+                                                    mime="application/octet-stream",
+                                                    key=f"dl_err_{e_id}"
+                                                )
+
                             with col_card2:
                                 st.markdown("<br>", unsafe_allow_html=True)
                                 if st.button("🗑️ Excluir", key=f"del_err_{e_id}"):
+                                    # Apaga o arquivo físico da pasta se existir
+                                    if file_fn and not pd.isna(file_fn):
+                                        f_path = ANEXOS_DIR / file_fn
+                                        if f_path.exists():
+                                            try:
+                                                f_path.unlink()
+                                            except Exception:
+                                                pass
+
                                     st.session_state.data["errors"] = [e for e in st.session_state.data["errors"] if e["id"] != e_id]
                                     persist()
                                     st.success("Erro excluído!")
@@ -740,37 +795,45 @@ elif page == "❌ Erros":
 
 
 # ============================================================
-# 7. 📝 MAPAS E RESUMOS (Com Anexo de Imagem)
+# 7. 📝 MAPAS E RESUMOS (Com Anexo de Imagens e Documentos)
 # ============================================================
 elif page == "📝 Mapas e Resumos":
     st.title("📝 Mapas & Resumos")
-    st.caption("Organize seus resumos e esquemas visuais estruturados por matéria e assunto, com suporte a imagens.")
+    st.caption("Organize seus resumos, mapas mentais e documentos de apoio estruturados por matéria e assunto.")
 
-    with st.expander("➕ Adicionar Novo Resumo / Mapa"):
+    ANEXOS_DIR = Path("anexos_estudos")
+    ANEXOS_DIR.mkdir(exist_ok=True)
+
+    with st.expander("➕ Adicionar Novo Resumo / Arquivo"):
         res_subj = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]], key="res_s_cad")
         topics_res = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == res_subj]
 
         with st.form("resumo_form"):
             res_top = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_res)
-            res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas de Curto-Circuito")
-            res_content = st.text_area("Texto do Resumo / Anotações (Opcional se enviar imagem)")
+            res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas de Curto-Circuito ou Resumo PDF")
+            res_content = st.text_area("Texto do Resumo / Anotações (Opcional se enviar anexo)")
             
-            # Novo campo para upload de imagem/esquema
-            uploaded_res_img = st.file_uploader("Anexar imagem do resumo/mapa (opcional)", type=["png", "jpg", "jpeg"], key="res_file_up")
+            # Suporte a imagens e documentos usuais
+            uploaded_file = st.file_uploader(
+                "Anexar arquivo (PDF, DOC/DOCX, PPT/PPTX ou Imagem)", 
+                type=["png", "jpg", "jpeg", "pdf", "doc", "docx", "ppt", "pptx"], 
+                key="res_file_up"
+            )
 
-            if st.form_submit_button("💾 Salvar Resumo", use_container_width=True):
+            if st.form_submit_button("💾 Salvar Resumo / Arquivo", use_container_width=True):
                 if not res_title.strip():
                     st.error("Informe um título ou descrição para o resumo.")
-                elif not res_content.strip() and uploaded_res_img is None:
-                    st.error("Você deve preencher o texto OU enviar uma imagem.")
+                elif not res_content.strip() and uploaded_file is None:
+                    st.error("Você deve preencher o texto OU enviar um arquivo/anexo.")
                 else:
-                    res_filename = ""
-                    if uploaded_res_img is not None:
-                        res_filename = f"resumo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_res_img.name}"
-                        res_path = RESUMOS_DIR / res_filename
-                        with open(res_path, "wb") as f:
-                            f.write(uploaded_res_img.getbuffer())
+                    file_filename = ""
+                    if uploaded_file is not None:
+                        file_filename = f"anexo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_file.name}"
+                        file_path = ANEXOS_DIR / file_filename
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
 
+                    # Garante compatibilidade se a chave antiga for encontrada no json
                     st.session_state.data["resumos"].append({
                         "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
                         "date": date.today().isoformat(),
@@ -778,20 +841,20 @@ elif page == "📝 Mapas e Resumos":
                         "topic": res_top if res_top != "Nenhum" else "Geral",
                         "title": res_title.strip(),
                         "content": res_content.strip(),
-                        "image_filename": res_filename
+                        "file_filename": file_filename
                     })
                     persist()
-                    st.success("Resumo salvo com sucesso!")
+                    st.success("Resumo/Arquivo salvo com sucesso!")
                     st.rerun()
 
     st.divider()
 
     resumos_list = st.session_state.data.get("resumos", [])
     if not resumos_list:
-        st.info("Nenhum resumo ou mapa cadastrado.")
+        st.info("Nenhum resumo ou arquivo cadastrado.")
     else:
         rdf = pd.DataFrame(resumos_list)
-        st.metric("Total de resumos cadastrados", len(rdf))
+        st.metric("Total de itens cadastrados", len(rdf))
 
         f_sub_res = st.selectbox("Filtrar por Disciplina (Opcional)", ["Todas"] + sorted(rdf["subject"].unique().tolist()), key="f_sub_res")
         view_res = rdf if f_sub_res == "Todas" else rdf[rdf["subject"] == f_sub_res]
@@ -800,7 +863,7 @@ elif page == "📝 Mapas e Resumos":
 
         materias_com_res = sorted(view_res["subject"].unique().tolist())
         if not materias_com_res:
-            st.info("Nenhum resumo encontrado para o filtro selecionado.")
+            st.info("Nenhum registro encontrado para o filtro selecionado.")
         else:
             for materia in materias_com_res:
                 df_materia_res = view_res[view_res["subject"] == materia]
@@ -819,7 +882,11 @@ elif page == "📝 Mapas e Resumos":
                             r_title = r["title"]
                             r_dt = r["date"]
                             r_content = r.get("content", "")
-                            img_fn = r.get("image_filename", "")
+                            
+                            # Compatibilidade com campos antigos (image_filename) e novos (file_filename)
+                            file_fn = r.get("file_filename", "")
+                            if not file_fn and "image_filename" in r:
+                                file_fn = r.get("image_filename", "")
 
                             col_rc1, col_rc2 = st.columns([5, 1])
                             with col_rc1:
@@ -827,18 +894,37 @@ elif page == "📝 Mapas e Resumos":
                                 if r_content:
                                     st.info(r_content)
                                 
-                                # Renderiza a imagem se houver anexo
-                                if img_fn and not pd.isna(img_fn) and str(img_fn).lower() != "nan":
-                                    full_img_path = RESUMOS_DIR / img_fn
-                                    if full_img_path.exists():
-                                        st.image(str(full_img_path), caption=r_title, use_container_width=True)
+                                # Verifica e renderiza o anexo conforme o tipo de arquivo
+                                if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
+                                    full_file_path = ANEXOS_DIR / file_fn
+                                    if full_file_path.exists():
+                                        ext = full_file_path.suffix.lower()
+                                        
+                                        # Se for imagem, exibe na tela
+                                        if ext in [".png", ".jpg", ".jpeg"]:
+                                            st.image(str(full_file_path), caption=r_title, use_container_width=True)
+                                        
+                                        # Se for documento (PDF, Word, PPT), exibe botão de download direto
+                                        else:
+                                            icon_map = {".pdf": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                            icon = icon_map.get(ext, "📎")
+                                            # Limpa o prefixo do timestamp para exibir o nome original limpo para download
+                                            orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
+                                            
+                                            with open(full_file_path, "rb") as file_bytes:
+                                                st.download_button(
+                                                    label=f"{icon} Baixar anexo: {orig_name}",
+                                                    data=file_bytes,
+                                                    file_name=orig_name,
+                                                    mime="application/octet-stream",
+                                                    key=f"dl_{r_id}"
+                                                )
 
                             with col_rc2:
                                 st.markdown("<br>", unsafe_allow_html=True)
                                 if st.button("🗑️ Excluir", key=f"del_res_{r_id}"):
-                                    # Remove arquivo físico da imagem também
-                                    if img_fn and not pd.isna(img_fn):
-                                        f_path = RESUMOS_DIR / img_fn
+                                    if file_fn and not pd.isna(file_fn):
+                                        f_path = ANEXOS_DIR / file_fn
                                         if f_path.exists():
                                             try:
                                                 f_path.unlink()
@@ -847,7 +933,7 @@ elif page == "📝 Mapas e Resumos":
 
                                     st.session_state.data["resumos"] = [item for item in st.session_state.data["resumos"] if item["id"] != r_id]
                                     persist()
-                                    st.success("Resumo excluído!")
+                                    st.success("Item excluído!")
                                     st.rerun()
                         st.markdown("---")
 
