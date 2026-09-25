@@ -734,8 +734,8 @@ elif page == "❌ Erros":
             err_solution = st.text_area("O que preciso lembrar / Solução")
             
             uploaded_err_file = st.file_uploader(
-                "Anexar arquivo de apoio (PDF, DOC/DOCX, PPT/PPTX ou Imagem)", 
-                type=["png", "jpg", "jpeg", "pdf", "doc", "docx", "ppt", "pptx"], 
+                "Anexar arquivo de apoio (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
+                type=["png", "jpg", "jpeg", "pdf", "txt", "doc", "docx", "ppt", "pptx"], 
                 key="err_file_up"
             )
 
@@ -810,21 +810,31 @@ elif page == "❌ Erros":
                                     full_file_path = ANEXOS_DIR / file_fn
                                     if full_file_path.exists():
                                         ext = full_file_path.suffix.lower()
+                                        
+                                        # PRÉ-VISUALIZAÇÃO PARA IMAGENS E TXT
                                         if ext in [".png", ".jpg", ".jpeg"]:
                                             st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
-                                        else:
-                                            icon_map = {".pdf": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
-                                            icon = icon_map.get(ext, "📎")
-                                            orig_name = "_".join(file_fn.split("_")[3:]) if "_" in file_fn else file_fn
-                                            
-                                            with open(full_file_path, "rb") as file_bytes:
-                                                st.download_button(
-                                                    label=f"{icon} Baixar anexo: {orig_name}",
-                                                    data=file_bytes,
-                                                    file_name=orig_name,
-                                                    mime="application/octet-stream",
-                                                    key=f"dl_err_{e_id}"
-                                                )
+                                        elif ext == ".txt":
+                                            try:
+                                                with open(full_file_path, "r", encoding="utf-8") as txt_file:
+                                                    txt_data = txt_file.read()
+                                                st.code(txt_data, language="text")
+                                            except Exception:
+                                                st.error("Não foi possível ler o conteúdo do arquivo de texto.")
+                                        
+                                        # BOTÃO DE DOWNLOAD
+                                        icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                        icon = icon_map.get(ext, "📎")
+                                        orig_name = "_".join(file_fn.split("_")[3:]) if "_" in file_fn else file_fn
+                                        
+                                        with open(full_file_path, "rb") as file_bytes:
+                                            st.download_button(
+                                                label=f"{icon} Baixar anexo: {orig_name}",
+                                                data=file_bytes,
+                                                file_name=orig_name,
+                                                mime="application/octet-stream",
+                                                key=f"dl_err_{e_id}"
+                                            )
 
                             with col_card2:
                                 st.markdown("<br>", unsafe_allow_html=True)
@@ -864,8 +874,8 @@ elif page == "📝 Mapas e Resumos":
             res_content = st.text_area("Texto do Resumo / Anotações (Opcional se enviar anexo)")
             
             uploaded_file = st.file_uploader(
-                "Anexar arquivo (PDF, DOC/DOCX, PPT/PPTX ou Imagem)", 
-                type=["png", "jpg", "jpeg", "pdf", "doc", "docx", "ppt", "pptx"], 
+                "Anexar arquivo (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
+                type=["png", "jpg", "jpeg", "pdf", "txt", "doc", "docx", "ppt", "pptx"], 
                 key="res_file_up"
             )
 
@@ -945,21 +955,34 @@ elif page == "📝 Mapas e Resumos":
                                     full_file_path = ANEXOS_DIR / file_fn
                                     if full_file_path.exists():
                                         ext = full_file_path.suffix.lower()
+                                        
+                                        # ----------------------------------------------------
+                                        # PRÉ-VISUALIZAÇÃO PARA IMAGENS E ARQUIVOS TXT
+                                        # ----------------------------------------------------
                                         if ext in [".png", ".jpg", ".jpeg"]:
                                             st.image(str(full_file_path), caption=r_title, use_container_width=True)
-                                        else:
-                                            icon_map = {".pdf": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
-                                            icon = icon_map.get(ext, "📎")
-                                            orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
-                                            
-                                            with open(full_file_path, "rb") as file_bytes:
-                                                st.download_button(
-                                                    label=f"{icon} Baixar anexo: {orig_name}",
-                                                    data=file_bytes,
-                                                    file_name=orig_name,
-                                                    mime="application/octet-stream",
-                                                    key=f"dl_{r_id}"
-                                                )
+                                        elif ext == ".txt":
+                                            try:
+                                                with open(full_file_path, "r", encoding="utf-8") as txt_file:
+                                                    txt_data = txt_file.read()
+                                                # Exibe o conteúdo do txt em uma caixa de código com rolagem
+                                                st.code(txt_data, language="text")
+                                            except Exception:
+                                                st.error("Não foi possível ler o conteúdo do arquivo de texto.")
+                                        
+                                        # Botão de download padrão para qualquer anexo
+                                        icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                        icon = icon_map.get(ext, "📎")
+                                        orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
+                                        
+                                        with open(full_file_path, "rb") as file_bytes:
+                                            st.download_button(
+                                                label=f"{icon} Baixar anexo: {orig_name}",
+                                                data=file_bytes,
+                                                file_name=orig_name,
+                                                mime="application/octet-stream",
+                                                key=f"dl_{r_id}"
+                                            )
 
                             with col_rc2:
                                 st.markdown("<br>", unsafe_allow_html=True)

@@ -1,0 +1,6 @@
+TIPO=ARMAÇÃO LINGUÍSTICA;
+GÊNERO = VEÍCULO PRÁTICO DE COMUNICAÇÃO NA SOCIEDADE;
+DISSERTAÇÃO EXPOSITIVA X DESCRIÇÃO;
+O texto expositivo explica e compartilha informações sobre um assunto, enquanto o texto descritivo detalha as características físicas ou sensoriais de um objeto, pessoa ou lugar.
+DESCRIÇÃO (com verbos no pretérito) X NARRATIVA
+O texto descritivo no pretérito paralisa o tempo para retratar uma cena, pessoa ou objeto do passado, enquanto o texto narrativo faz o tempo avançar através de uma sequência de ações dos personagens.
