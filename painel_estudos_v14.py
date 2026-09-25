@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 
 # ============================================================
-# PAINEL CENTRAL DE GESTÃO DE ESTUDOS V3 — CONCURSOS ENGENHARIA
+# PAINEL CENTRAL DE GESTÃO DE ESTUDOS V3.2 — CONCURSOS ENGENHARIA
 # ============================================================
 
 st.set_page_config(
@@ -21,7 +21,7 @@ DATA_FILE = Path("estudo_concursos_data.json")
 RESUMOS_DIR = Path("resumos")
 RESUMOS_DIR.mkdir(exist_ok=True)
 
-BACKUP_VERSION = "3.1"
+BACKUP_VERSION = "3.2"
 
 CORE_SUBJECTS = [
     {"name": "Circuitos Elétricos", "type": "Específica", "order": 1, "active": True, "block_minutes": 90},
@@ -37,6 +37,15 @@ PHASES = {
     2: "Questões / Fixação",
     3: "Revisão Ativa / Aprofundamento",
 }
+
+STATUS_OPTIONS = [
+    "Não iniciado",
+    "Estudando Teoria",
+    "Fazendo Questões",
+    "Revisando",
+    "Assimilado/Concluído",
+    "Concluído"
+]
 
 ERROR_REASONS = [
     "Conceito", "Cálculo", "Interpretação", "Atenção", "Fórmula", "Pegadinha"
@@ -416,11 +425,11 @@ elif page == "📚 Edital":
 
 
 # ============================================================
-# 4. 📋 PLANILHA DE CONTROLE
+# 4. 📋 PLANILHA DE CONTROLE (TOTALMENTE EDITÁVEL)
 # ============================================================
 elif page == "📋 Planilha de Controle":
     st.title("📋 Planilha de Controle do Edital")
-    st.caption("Acompanhe o status do edital, o acumulado de questões e a evolução histórica do seu aproveitamento por tópico.")
+    st.caption("Acompanhe e edite diretamente o status, aproveitamento, memória e anotações do seu edital.")
 
     topics_list = st.session_state.data.get("topics", [])
     sessions_df = session_dataframe()
@@ -435,7 +444,6 @@ elif page == "📋 Planilha de Controle":
             t_subj = t["subject"]
             t_name = t["name"]
 
-            # Buscar todas as sessões associadas a este tópico específico
             match_sess = pd.DataFrame()
             if not sessions_df.empty:
                 match_sess = sessions_df[(sessions_df["subject"] == t_subj) & (sessions_df["topic"].str.contains(t_name, na=False))]
@@ -443,60 +451,109 @@ elif page == "📋 Planilha de Controle":
             tot_q = int(match_sess["questions"].sum()) if not match_sess.empty else 0
             tot_c = int(match_sess["correct"].sum()) if not match_sess.empty else 0
             
-            # Aproveitamento atual (última sessão ou média geral)
             if tot_q > 0:
                 avg_acc = (tot_c / tot_q) * 100
             else:
                 avg_acc = t.get("accuracy") or 0.0
 
-            # Histórico de evolução (ex: 30% ➔ 60% ➔ 75%)
-            historico_evolucao = "-"
-            if not match_sess.empty and "accuracy" in match_sess.columns:
-                # Ordenar por data/timestamp se houver
+            historico_evolucao = t.get("historico_evolucao", "-")
+            if historico_evolucao == "-" and not match_sess.empty and "accuracy" in match_sess.columns:
                 if "timestamp" in match_sess.columns:
                     match_sess = match_sess.sort_values("timestamp")
                 accs = match_sess["accuracy"].dropna().tolist()
                 if accs:
                     historico_evolucao = " ➔ ".join([f"{a:.0f}%" for a in accs])
 
-            # Status de Revisão (Dias sem contato)
             last_st = t.get("last_studied")
             dias_passados = (hoje - date.fromisoformat(last_st[:10])).days if (last_st and len(last_st) >= 10) else 999
 
-            if dias_passados == 999:
-                status_revisao = "⚪ Nunca"
-            elif dias_passados <= 15:
-                status_revisao = "🟢 Em dia (≤15d)"
-            elif dias_passados <= 30:
-                status_revisao = "🟡 Atenção (16-30d)"
-            else:
-                status_revisao = "🔴 Urgente (>30d)"
+            # Memória padrão calculada, mas que agora poderá ser editada na tabela
+            default_memoria = t.get("memoria", "")
+            if not default_memoria:
+                if dias_passados == 999:
+                    default_memoria = "⚪ Nunca"
+                elif dias_passados <= 15:
+                    default_memoria = "🟢 Em dia (≤15d)"
+                elif dias_passados <= 30:
+                    default_memoria = "🟡 Atenção (16-30d)"
+                else:
+                    default_memoria = "🔴 Urgente (>30d)"
 
             ctrl_rows.append({
+                "id": t["id"],
                 "Disciplina": t_subj,
                 "Tópico": t_name,
                 "Status": t.get("status", "Não iniciado"),
                 "Evolução Histórica": historico_evolucao,
-                "Aproveitamento Atual": f"{avg_acc:.1f}%",
-                "Memória": status_revisao,
+                "Aproveitamento Atual (%)": float(avg_acc),
+                "Memória": default_memoria,
                 "Questões": tot_q,
                 "Acertos": tot_c,
                 "Último Estudo": last_st if last_st else "-"
             })
 
         df_ctrl = pd.DataFrame(ctrl_rows)
-        st.dataframe(df_ctrl, hide_index=True, use_container_width=True)
+
+        # Tabela 100% editável (agora com Status e Memoria como dropdowns)
+        edited_df = st.data_editor(
+            df_ctrl,
+            column_config={
+                "id": None, # Oculta a coluna de ID interna
+                "Status": st.column_config.SelectboxColumn(
+                    "Status",
+                    options=STATUS_OPTIONS,
+                    required=True
+                ),
+                "Memória": st.column_config.SelectboxColumn(
+                    "Memória",
+                    options=[
+                        "⚪ Nunca",
+                        "🟢 Em dia (≤15d)",
+                        "🟡 Atenção (16-30d)",
+                        "🔴 Urgente (>30d)",
+                        "⭐ Fixado / Consolidado"
+                    ],
+                    required=True
+                ),
+                "Aproveitamento Atual (%)": st.column_config.NumberColumn(
+                    "Aproveitamento Atual (%)",
+                    format="%.1f%%",
+                    min_value=0.0,
+                    max_value=100.0,
+                    step=0.5
+                ),
+                "Disciplina": st.column_config.TextColumn("Disciplina", disabled=True),
+                "Tópico": st.column_config.TextColumn("Tópico", disabled=True),
+                "Questões": st.column_config.NumberColumn("Questões", disabled=True),
+                "Acertos": st.column_config.NumberColumn("Acertos", disabled=True),
+                "Último Estudo": st.column_config.TextColumn("Último Estudo", disabled=True),
+            },
+            hide_index=True,
+            use_container_width=True,
+            key="spreadsheet_editor"
+        )
+
+        if st.button("💾 Salvar Alterações da Planilha", use_container_width=True):
+            for _, row in edited_df.iterrows():
+                t_id = row["id"]
+                for t in st.session_state.data["topics"]:
+                    if t["id"] == t_id:
+                        t["status"] = row["Status"]
+                        t["historico_evolucao"] = row["Evolução Histórica"]
+                        t["accuracy"] = row["Aproveitamento Atual (%)"]
+                        t["memoria"] = row["Memória"]
+            persist()
+            st.success("Alterações salvas com sucesso na planilha de controle!")
+            st.rerun()
 
         st.divider()
         st.markdown("### 📈 Detalhar Histórico de Tópico")
         st.caption("Selecione um tópico abaixo para ver o detalhamento de cada bateria de questões realizada ao longo do tempo.")
 
-        # Seletor prático para inspecionar a evolução de um assunto específico se necessário
         top_options = [f"[{row['Disciplina']}] {row['Tópico']}" for row in ctrl_rows]
         selected_inspect = st.selectbox("Escolha o tópico para auditar a evolução", ["Nenhum"] + top_options)
 
         if selected_inspect != "Nenhum":
-            # Extrair disciplina e tópico selecionados
             sel_subj = selected_inspect.split("] ")[0].replace("[", "")
             sel_top = selected_inspect.split("] ")[1]
 
@@ -505,10 +562,9 @@ elif page == "📋 Planilha de Controle":
                 st.write(f"**Histórico detalhado de sessões para: {sel_top}**")
                 st.dataframe(aud_sess[["timestamp", "phase", "minutes", "questions", "correct", "accuracy"]], hide_index=True, use_container_width=True)
                 
-                # Gráfico rápido de linha mostrando a subida do aproveitamento no tempo
                 if len(aud_sess) > 1:
                     fig_evo = px.line(aud_sess, x="timestamp", y="accuracy", markers=True, title=f"Curva de Aprendizado — {sel_top}")
-                    fig_evo.update_yaxis(range=[0, 105])
+                    fig_evo.update_yaxes(range=[0, 105]) # Corrigido de update_yaxis para update_yaxes
                     st.plotly_chart(fig_evo, use_container_width=True)
             else:
                 st.info("Nenhuma sessão registrada com detalhamento para este tópico.")
@@ -591,6 +647,9 @@ elif page == "▶️ Estudar":
                 topic_sel = st.selectbox("Tópico Abordado", topics_for_subj if topics_for_subj else ["Nenhum tópico cadastrado"])
                 phase_num = st.selectbox("Fase", [1, 2, 3], format_func=lambda x: f"Fase {x} — {PHASES[x]}")
                 
+                # Campo opcional para preencher o Status diretamente ao registrar
+                status_registro = st.selectbox("Status Atualizar na Planilha", STATUS_OPTIONS, index=4)
+
                 default_mins = round(st.session_state.timer_seconds / 60, 1) if st.session_state.timer_seconds > 0 else 90.0
                 minutes = st.number_input("Tempo (minutos)", value=float(default_mins), step=5.0)
                 
@@ -622,15 +681,13 @@ elif page == "▶️ Estudar":
                         "accuracy": acc,
                     })
 
+                    # Atualiza o tópico correspondente na planilha de controle
                     for t in st.session_state.data["topics"]:
                         if t["subject"] == subject_sel and t["name"] == topic_sel:
                             t["last_studied"] = session_date_str
+                            t["status"] = status_registro # Define o status escolhido no menu Estudar
                             if acc is not None:
                                 t["accuracy"] = acc
-                                if acc >= 70:
-                                    t["status"] = "Assimilado/Concluído"
-                                else:
-                                    t["status"] = "Lido/Estudado"
 
                     if questions > 0 and acc is not None:
                         if acc < 70:
@@ -653,12 +710,12 @@ elif page == "▶️ Estudar":
 
                     advance_cycle(subject_sel)
                     reset_timer()
-                    st.success("Bloco registrado com sucesso! Ciclo avançado.")
+                    st.success("Bloco registrado com sucesso! Ciclo avançado e planilha atualizada.")
                     st.rerun()
 
 
 # ============================================================
-# 6. ❌ ERROS (Com Suporte a Anexos de Documentos e Imagens)
+# 6. ❌ ERROS
 # ============================================================
 elif page == "❌ Erros":
     st.title("❌ Caderno de Erros")
@@ -676,7 +733,6 @@ elif page == "❌ Erros":
             err_reason = st.selectbox("Por que errei?", ERROR_REASONS)
             err_solution = st.text_area("O que preciso lembrar / Solução")
             
-            # Campo de upload para documentos e imagens no Caderno de Erros
             uploaded_err_file = st.file_uploader(
                 "Anexar arquivo de apoio (PDF, DOC/DOCX, PPT/PPTX ou Imagem)", 
                 type=["png", "jpg", "jpeg", "pdf", "doc", "docx", "ppt", "pptx"], 
@@ -701,7 +757,7 @@ elif page == "❌ Erros":
                         "topic": err_top if err_top != "Nenhum" else "Geral",
                         "reason": err_reason,
                         "solution": err_solution.strip(),
-                        "file_filename": file_filename  # Salva o nome do arquivo anexado
+                        "file_filename": file_filename  
                     })
                     persist()
                     st.success("Erro registrado no caderno com sucesso!")
@@ -750,17 +806,12 @@ elif page == "❌ Erros":
                                 if e_sol:
                                     st.info(e_sol)
                                 
-                                # Renderiza o anexo se houver
                                 if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
                                     full_file_path = ANEXOS_DIR / file_fn
                                     if full_file_path.exists():
                                         ext = full_file_path.suffix.lower()
-                                        
-                                        # Se for imagem, exibe na tela
                                         if ext in [".png", ".jpg", ".jpeg"]:
                                             st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
-                                        
-                                        # Se for documento (PDF, Word, PPT), exibe botão de download
                                         else:
                                             icon_map = {".pdf": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
                                             icon = icon_map.get(ext, "📎")
@@ -778,7 +829,6 @@ elif page == "❌ Erros":
                             with col_card2:
                                 st.markdown("<br>", unsafe_allow_html=True)
                                 if st.button("🗑️ Excluir", key=f"del_err_{e_id}"):
-                                    # Apaga o arquivo físico da pasta se existir
                                     if file_fn and not pd.isna(file_fn):
                                         f_path = ANEXOS_DIR / file_fn
                                         if f_path.exists():
@@ -795,7 +845,7 @@ elif page == "❌ Erros":
 
 
 # ============================================================
-# 7. 📝 MAPAS E RESUMOS (Com Anexo de Imagens e Documentos)
+# 7. 📝 MAPAS E RESUMOS
 # ============================================================
 elif page == "📝 Mapas e Resumos":
     st.title("📝 Mapas & Resumos")
@@ -813,7 +863,6 @@ elif page == "📝 Mapas e Resumos":
             res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas de Curto-Circuito ou Resumo PDF")
             res_content = st.text_area("Texto do Resumo / Anotações (Opcional se enviar anexo)")
             
-            # Suporte a imagens e documentos usuais
             uploaded_file = st.file_uploader(
                 "Anexar arquivo (PDF, DOC/DOCX, PPT/PPTX ou Imagem)", 
                 type=["png", "jpg", "jpeg", "pdf", "doc", "docx", "ppt", "pptx"], 
@@ -833,7 +882,6 @@ elif page == "📝 Mapas e Resumos":
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
 
-                    # Garante compatibilidade se a chave antiga for encontrada no json
                     st.session_state.data["resumos"].append({
                         "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
                         "date": date.today().isoformat(),
@@ -883,7 +931,6 @@ elif page == "📝 Mapas e Resumos":
                             r_dt = r["date"]
                             r_content = r.get("content", "")
                             
-                            # Compatibilidade com campos antigos (image_filename) e novos (file_filename)
                             file_fn = r.get("file_filename", "")
                             if not file_fn and "image_filename" in r:
                                 file_fn = r.get("image_filename", "")
@@ -894,21 +941,15 @@ elif page == "📝 Mapas e Resumos":
                                 if r_content:
                                     st.info(r_content)
                                 
-                                # Verifica e renderiza o anexo conforme o tipo de arquivo
                                 if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
                                     full_file_path = ANEXOS_DIR / file_fn
                                     if full_file_path.exists():
                                         ext = full_file_path.suffix.lower()
-                                        
-                                        # Se for imagem, exibe na tela
                                         if ext in [".png", ".jpg", ".jpeg"]:
                                             st.image(str(full_file_path), caption=r_title, use_container_width=True)
-                                        
-                                        # Se for documento (PDF, Word, PPT), exibe botão de download direto
                                         else:
                                             icon_map = {".pdf": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
                                             icon = icon_map.get(ext, "📎")
-                                            # Limpa o prefixo do timestamp para exibir o nome original limpo para download
                                             orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
                                             
                                             with open(full_file_path, "rb") as file_bytes:
