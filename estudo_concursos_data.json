@@ -65,7 +65,7 @@
       "subject": "Língua Portuguesa",
       "name": "1 Noções Gerais de Compreensão e Interpretação de Texto",
       "status": "Não iniciado",
-      "accuracy": 0.0,
+      "accuracy": null,
       "last_studied": null,
       "assunto": "Geral",
       "historico_evolucao": "-",
@@ -75,11 +75,11 @@
       "id": "blk-2026-09-08T21:15:53-1",
       "subject": "Língua Portuguesa",
       "name": "2 Tipologia Textual. Gêneros Textuais",
-      "status": "Estudando Teoria",
-      "accuracy": 0.0,
-      "last_studied": "2026-09-24",
+      "status": "Fazendo Questões",
+      "accuracy": 100.0,
+      "last_studied": "2026-09-25",
       "assunto": "Geral",
-      "historico_evolucao": "-",
+      "historico_evolucao": "100%",
       "memoria": "🟢 Em dia (≤15d)"
     },
     {
@@ -857,11 +857,45 @@
       "questions": 0,
       "correct": 0,
       "accuracy": null
+    },
+    {
+      "id": "20260925201312904664",
+      "date": "2026-09-25",
+      "timestamp": "2026-09-25 20:13",
+      "subject": "Língua Portuguesa",
+      "topic": "2 Tipologia Textual. Gêneros Textuais",
+      "phase": 2,
+      "minutes": 20.0,
+      "questions": 5,
+      "correct": 5,
+      "accuracy": 100.0
+    },
+    {
+      "id": "20260925210556621294",
+      "date": "2026-09-25",
+      "timestamp": "2026-09-25 21:05",
+      "subject": "Língua Portuguesa",
+      "topic": "2 Tipologia Textual. Gêneros Textuais",
+      "phase": 2,
+      "minutes": 15.0,
+      "questions": 0,
+      "correct": 0,
+      "accuracy": null
     }
   ],
   "errors": [],
   "cycle_index": 0,
-  "reviews": [],
+  "reviews": [
+    {
+      "id": "rev-20260925201312904664",
+      "subject": "Língua Portuguesa",
+      "topic": "2 Tipologia Textual. Gêneros Textuais",
+      "due_date": "2026-10-25",
+      "interval": "30 dias (100%)",
+      "done": false,
+      "dismissed": false
+    }
+  ],
   "resumos": [
     {
       "id": "20260924201457979850",
@@ -891,13 +925,13 @@
       "file_filename": "anexo_20260924204641_generos-textuais.png"
     },
     {
-      "id": "20260925201106048679",
+      "id": "20260925203656536677",
       "date": "2026-09-25",
       "subject": "Língua Portuguesa",
       "topic": "2 Tipologia Textual. Gêneros Textuais",
-      "title": "bizus-tipologia",
-      "content": "",
-      "file_filename": "anexo_20260925201106_tipologia-textual.txt"
+      "title": "tipologia-bizus",
+      "content": "**TIPO**=ARMAÇÃO LINGUÍSTICA;\n**GÊNERO** = VEÍCULO PRÁTICO DE COMUNICAÇÃO NA SOCIEDADE;\n**DISSERTAÇÃO EXPOSITIVA X DESCRIÇÃO**\nO texto expositivo explica e compartilha informações sobre um assunto, enquanto o texto descritivo detalha as características físicas ou sensoriais de um objeto, pessoa ou lugar.\n**DESCRIÇÃO (com verbos no pretérito) X NARRATIVA**\nO texto descritivo no pretérito paralisa o tempo para retratar uma cena, pessoa ou objeto do passado, enquanto o texto narrativo faz o tempo avançar através de uma sequência de ações dos personagens.\n**PEGADINHA DA PREDOMINÂNCIA:** \nTexto nunca é 100% puro. Exemplo: Textos longos que começa contando uma história (narrativo), passa três parágrafos caracterizando o cenário (descritivo) e terminam com uma opinião (argumentativo). \nO enunciado geralmente pede o tipo PREDOMINANTE. \nPergunte-se: \"Se eu tirasse a descrição ou a narração daqui, o texto ainda cumpriria seu objetivo principal?\". A tipologia vencedora é aquela que carrega a intenção principal do autor. O que define a predominância é a função social e o objetivo final do texto.\n**INJUNTIVO (INSTRUÇÃO) X PRESCRITIVO (ORDEM ABSOLUTA)**\nInjuntivo é optativo (receita de bolo, manual). Prescritivo é imposição (lei, contrato)",
+      "file_filename": ""
     }
   ],
   "flashcards_log": [

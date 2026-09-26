@@ -569,6 +569,70 @@ elif page == "📋 Planilha de Controle":
             else:
                 st.info("Nenhuma sessão registrada com detalhamento para este tópico.")
 
+        st.divider()
+        st.subheader("🗑️ Corrigir / Excluir Sessões Registradas por Engano")
+        st.caption("Caso tenha registrado uma sessão no tópico ou disciplina errada, você pode excluí-la abaixo.")
+
+        sessions_list = st.session_state.data.get("study_sessions", [])
+        if not sessions_list:
+            st.info("Nenhuma sessão de estudo registrada até o momento.")
+        else:
+            # Mostra as últimas 15 sessões registradas (da mais recente para a mais antiga)
+            recent_sessions = list(reversed(sessions_list[-15:]))
+            
+            for s in recent_sessions:
+                s_id = s.get("id")
+                s_time = s.get("timestamp", s.get("date", ""))
+                s_subj = s.get("subject", "")
+                s_top = s.get("topic", "")
+                s_mins = s.get("minutes", 0)
+                s_q = s.get("questions", 0)
+                s_c = s.get("correct", 0)
+
+                col_sess1, col_sess2 = st.columns([5, 1])
+                with col_sess1:
+                    st.markdown(f"**[{s_time}]** `{s_subj}` ➔ *{s_top}* | **{s_mins} min** | Q: {s_q} | Acertos: {s_c}")
+                
+                with col_sess2:
+                    if st.button("🗑️ Excluir", key=f"del_sess_{s_id}", use_container_width=True):
+                        # 1. Guarda os dados da sessão antes de apagar para achar o tópico correspondente
+                        target_session = next((sess for sess in st.session_state.data["study_sessions"] if sess.get("id") == s_id), None)
+                        
+                        if target_session:
+                            t_subj = target_session.get("subject")
+                            t_top = target_session.get("topic")
+                            
+                            # 2. Remove a sessão da lista
+                            st.session_state.data["study_sessions"] = [
+                                sess for sess in st.session_state.data["study_sessions"] if sess.get("id") != s_id
+                            ]
+                            
+                            # 3. Atualiza ou limpa os dados do tópico na planilha de controle
+                            remaining_sessions = [
+                                sess for sess in st.session_state.data["study_sessions"] 
+                                if sess.get("subject") == t_subj and sess.get("topic") == t_top
+                            ]
+                            
+                            for t in st.session_state.data["topics"]:
+                                if t["subject"] == t_subj and t["name"] == t_top:
+                                    if remaining_sessions:
+                                        # Se ainda há sessões, pega a mais recente restante
+                                        remaining_sorted = sorted(remaining_sessions, key=lambda x: x.get("timestamp", x.get("date", "")))
+                                        latest_sess = remaining_sorted[-1]
+                                        
+                                        t["last_studied"] = latest_sess.get("date")
+                                        if latest_sess.get("accuracy") is not None:
+                                            t["accuracy"] = latest_sess.get("accuracy")
+                                    else:
+                                        # Se era a única sessão do tópico, limpa os registros
+                                        t["last_studied"] = None
+                                        t["accuracy"] = None
+                                        t["status"] = "Não iniciado"
+                            
+                            persist()
+                            st.success("Sessão excluída e planilha de controle atualizada com sucesso!")
+                            st.rerun()
+
 
 # ============================================================
 # 5. ▶️ ESTUDAR
@@ -719,7 +783,10 @@ elif page == "▶️ Estudar":
 # ============================================================
 elif page == "❌ Erros":
     st.title("❌ Caderno de Erros")
-    st.caption("Consulte seus pontos críticos organizados por matéria e assunto, com suporte a anotações e arquivos de apoio.")
+    st.caption("Consulte seus pontos críticos organizados por matéria e assunto, com suporte a anotações, pré-visualização de textos e edição.")
+
+    if "editing_error_id" not in st.session_state:
+        st.session_state.editing_error_id = None
 
     ANEXOS_DIR = Path("anexos_estudos")
     ANEXOS_DIR.mkdir(exist_ok=True)
@@ -772,7 +839,7 @@ elif page == "❌ Erros":
         edf = pd.DataFrame(errors_list)
         st.metric("Total de erros registrados", len(edf))
 
-        f_sub = st.selectbox("Filtrar por Disciplina (Opcional)", ["Todas"] + sorted(edf["subject"].unique().tolist()))
+        f_sub = st.selectbox("Filtrar por Disciplina (Opcional)", ["Todas"] + sorted(edf["subject"].unique().tolist()), key="f_sub_err_filt")
         view_err = edf if f_sub == "Todas" else edf[edf["subject"] == f_sub]
 
         st.divider()
@@ -802,42 +869,73 @@ elif page == "❌ Erros":
 
                             col_card1, col_card2 = st.columns([5, 1])
                             with col_card1:
-                                st.markdown(f"**Motivo:** `{e_reas}` *(Registrado em {e_dt})*")
-                                if e_sol:
-                                    st.info(e_sol)
-                                
-                                if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
-                                    full_file_path = ANEXOS_DIR / file_fn
-                                    if full_file_path.exists():
-                                        ext = full_file_path.suffix.lower()
+                                if st.session_state.editing_error_id == e_id:
+                                    with st.form(f"edit_err_form_{e_id}"):
+                                        st.markdown(f"**Editando Erro ({e_reas})**")
+                                        new_edit_reason = st.selectbox("Motivo", ERROR_REASONS, index=ERROR_REASONS.index(e_reas) if e_reas in ERROR_REASONS else 0)
+                                        new_edit_solution = st.text_area("O que preciso lembrar / Solução", value=e_sol)
                                         
-                                        # PRÉ-VISUALIZAÇÃO PARA IMAGENS E TXT
-                                        if ext in [".png", ".jpg", ".jpeg"]:
-                                            st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
-                                        elif ext == ".txt":
-                                            try:
-                                                with open(full_file_path, "r", encoding="utf-8") as txt_file:
-                                                    txt_data = txt_file.read()
-                                                st.code(txt_data, language="text")
-                                            except Exception:
-                                                st.error("Não foi possível ler o conteúdo do arquivo de texto.")
+                                        col_es1, col_es2 = st.columns(2)
+                                        with col_es1:
+                                            if st.form_submit_button("💾 Salvar", use_container_width=True):
+                                                for item in st.session_state.data["errors"]:
+                                                    if item["id"] == e_id:
+                                                        item["reason"] = new_edit_reason
+                                                        item["solution"] = new_edit_solution.strip()
+                                                persist()
+                                                st.session_state.editing_error_id = None
+                                                st.success("Erro atualizado!")
+                                                st.rerun()
+                                        with col_es2:
+                                            if st.form_submit_button("❌ Cancelar", use_container_width=True):
+                                                st.session_state.editing_error_id = None
+                                                st.rerun()
+                                else:
+                                    st.markdown(f"**Motivo:** `{e_reas}` *(Registrado em {e_dt})*")
+                                    if e_sol:
+                                        import re
+                                        formatted_solution = re.sub(r'\*\*(.*?)\*\*', r'<b style="color: #f59e0b; text-decoration: underline;">\1</b>', e_sol)
+                                        solution_html = formatted_solution.replace("\n", "<br>")
                                         
-                                        # BOTÃO DE DOWNLOAD
-                                        icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
-                                        icon = icon_map.get(ext, "📎")
-                                        orig_name = "_".join(file_fn.split("_")[3:]) if "_" in file_fn else file_fn
-                                        
-                                        with open(full_file_path, "rb") as file_bytes:
-                                            st.download_button(
-                                                label=f"{icon} Baixar anexo: {orig_name}",
-                                                data=file_bytes,
-                                                file_name=orig_name,
-                                                mime="application/octet-stream",
-                                                key=f"dl_err_{e_id}"
-                                            )
+                                        st.markdown(f"""
+                                        <div style="background-color: rgba(128,128,128,0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(128,128,128,0.2);">
+                                            {solution_html}
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                                    
+                                    if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
+                                        full_file_path = ANEXOS_DIR / file_fn
+                                        if full_file_path.exists():
+                                            ext = full_file_path.suffix.lower()
+                                            if ext in [".png", ".jpg", ".jpeg"]:
+                                                st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
+                                            elif ext == ".txt":
+                                                try:
+                                                    with open(full_file_path, "r", encoding="utf-8") as txt_file:
+                                                        txt_data = txt_file.read()
+                                                    st.code(txt_data, language="text")
+                                                except Exception:
+                                                    st.error("Não foi possível ler o arquivo de texto.")
+                                            
+                                            icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                            icon = icon_map.get(ext, "📎")
+                                            orig_name = "_".join(file_fn.split("_")[3:]) if "_" in file_fn else file_fn
+                                            
+                                            with open(full_file_path, "rb") as file_bytes:
+                                                st.download_button(
+                                                    label=f"{icon} Baixar anexo: {orig_name}",
+                                                    data=file_bytes,
+                                                    file_name=orig_name,
+                                                    mime="application/octet-stream",
+                                                    key=f"dl_err_{e_id}"
+                                                )
 
                             with col_card2:
                                 st.markdown("<br>", unsafe_allow_html=True)
+                                if st.button("✏️ Editar", key=f"edit_err_btn_{e_id}"):
+                                    st.session_state.editing_error_id = e_id
+                                    st.rerun()
+                                    
                                 if st.button("🗑️ Excluir", key=f"del_err_{e_id}"):
                                     if file_fn and not pd.isna(file_fn):
                                         f_path = ANEXOS_DIR / file_fn
@@ -859,7 +957,10 @@ elif page == "❌ Erros":
 # ============================================================
 elif page == "📝 Mapas e Resumos":
     st.title("📝 Mapas & Resumos")
-    st.caption("Organize seus resumos, mapas mentais e documentos de apoio estruturados por matéria e assunto.")
+    st.caption("Organize seus resumos, mapas mentais e documentos com pré-visualização de textos e suporte a edição.")
+
+    if "editing_resumo_id" not in st.session_state:
+        st.session_state.editing_resumo_id = None
 
     ANEXOS_DIR = Path("anexos_estudos")
     ANEXOS_DIR.mkdir(exist_ok=True)
@@ -940,52 +1041,78 @@ elif page == "📝 Mapas e Resumos":
                             r_title = r["title"]
                             r_dt = r["date"]
                             r_content = r.get("content", "")
-                            
                             file_fn = r.get("file_filename", "")
-                            if not file_fn and "image_filename" in r:
-                                file_fn = r.get("image_filename", "")
 
                             col_rc1, col_rc2 = st.columns([5, 1])
                             with col_rc1:
-                                st.markdown(f"**{r_title}** *(Criado em {r_dt})*")
-                                if r_content:
-                                    st.info(r_content)
-                                
-                                if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
-                                    full_file_path = ANEXOS_DIR / file_fn
-                                    if full_file_path.exists():
-                                        ext = full_file_path.suffix.lower()
+                                if st.session_state.editing_resumo_id == r_id:
+                                    with st.form(f"edit_res_form_{r_id}"):
+                                        st.markdown(f"**Editando Resumo**")
+                                        new_edit_title = st.text_input("Título / Descrição", value=r_title)
+                                        new_edit_content = st.text_area("Texto / Anotações", value=r_content)
                                         
-                                        # ----------------------------------------------------
-                                        # PRÉ-VISUALIZAÇÃO PARA IMAGENS E ARQUIVOS TXT
-                                        # ----------------------------------------------------
-                                        if ext in [".png", ".jpg", ".jpeg"]:
-                                            st.image(str(full_file_path), caption=r_title, use_container_width=True)
-                                        elif ext == ".txt":
-                                            try:
-                                                with open(full_file_path, "r", encoding="utf-8") as txt_file:
-                                                    txt_data = txt_file.read()
-                                                # Exibe o conteúdo do txt em uma caixa de código com rolagem
-                                                st.code(txt_data, language="text")
-                                            except Exception:
-                                                st.error("Não foi possível ler o conteúdo do arquivo de texto.")
+                                        col_rs1, col_rs2 = st.columns(2)
+                                        with col_rs1:
+                                            if st.form_submit_button("💾 Salvar", use_container_width=True):
+                                                for item in st.session_state.data["resumos"]:
+                                                    if item["id"] == r_id:
+                                                        item["title"] = new_edit_title.strip()
+                                                        item["content"] = new_edit_content.strip()
+                                                persist()
+                                                st.session_state.editing_resumo_id = None
+                                                st.success("Atualizado com sucesso!")
+                                                st.rerun()
+                                        with col_rs2:
+                                            if st.form_submit_button("❌ Cancelar", use_container_width=True):
+                                                st.session_state.editing_resumo_id = None
+                                                st.rerun()
+                                else:
+                                    st.markdown(f"**{r_title}** *(Criado em {r_dt})*")
+                                    if r_content:
+                                        import re
+                                        # Converte **texto** em <b>texto</b> automaticamente
+                                        formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b style="color: #f59e0b; text-decoration: underline;">\1</b>', r_content)
+                                        content_html = formatted_content.replace("\n", "<br>")
                                         
-                                        # Botão de download padrão para qualquer anexo
-                                        icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
-                                        icon = icon_map.get(ext, "📎")
-                                        orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
-                                        
-                                        with open(full_file_path, "rb") as file_bytes:
-                                            st.download_button(
-                                                label=f"{icon} Baixar anexo: {orig_name}",
-                                                data=file_bytes,
-                                                file_name=orig_name,
-                                                mime="application/octet-stream",
-                                                key=f"dl_{r_id}"
-                                            )
+                                        st.markdown(f"""
+                                        <div style="background-color: rgba(128,128,128,0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(128,128,128,0.2);">
+                                            {content_html}
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                                    
+                                    if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
+                                        full_file_path = ANEXOS_DIR / file_fn
+                                        if full_file_path.exists():
+                                            ext = full_file_path.suffix.lower()
+                                            if ext in [".png", ".jpg", ".jpeg"]:
+                                                st.image(str(full_file_path), caption=r_title, use_container_width=True)
+                                            elif ext == ".txt":
+                                                try:
+                                                    with open(full_file_path, "r", encoding="utf-8") as txt_file:
+                                                        txt_data = txt_file.read()
+                                                    st.code(txt_data, language="text")
+                                                except Exception:
+                                                    st.error("Não foi possível ler o arquivo de texto.")
+                                            
+                                            icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                            icon = icon_map.get(ext, "📎")
+                                            orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
+                                            
+                                            with open(full_file_path, "rb") as file_bytes:
+                                                st.download_button(
+                                                    label=f"{icon} Baixar anexo: {orig_name}",
+                                                    data=file_bytes,
+                                                    file_name=orig_name,
+                                                    mime="application/octet-stream",
+                                                    key=f"dl_{r_id}"
+                                                )
 
                             with col_rc2:
                                 st.markdown("<br>", unsafe_allow_html=True)
+                                if st.button("✏️ Editar", key=f"edit_res_btn_{r_id}"):
+                                    st.session_state.editing_resumo_id = r_id
+                                    st.rerun()
+                                    
                                 if st.button("🗑️ Excluir", key=f"del_res_{r_id}"):
                                     if file_fn and not pd.isna(file_fn):
                                         f_path = ANEXOS_DIR / file_fn
