@@ -896,7 +896,17 @@
       "accuracy": 80.0
     }
   ],
-  "errors": [],
+  "errors": [
+    {
+      "id": "20260928022735501025",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "reason": "Pegadinha",
+      "solution": "Os vocábulos “experiência”, “usuário”, “conteúdo” e “audiência” são acentuados de acordo com a mesma regra de acentuação gráfica.\n\nGabarito: ERRADO\nExperiência —> paroxítona terminada em ditongo.\nUsuário —> paroxítona terminada em ditongo.\nConteúdo —> regra do hiato.\nAudiência —> paroxítona terminada em ditongo.",
+      "file_filename": ""
+    }
+  ],
   "cycle_index": 0,
   "reviews": [
     {
