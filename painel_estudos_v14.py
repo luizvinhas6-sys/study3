@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 import os
+import base64
+import requests
 from datetime import datetime, date, timedelta
 from pathlib import Path
 import pandas as pd
@@ -17,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Permitir zoom em celular
+# Permitir zoom em dispositivos móveis
 st.markdown("""
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 """, unsafe_allow_html=True)
@@ -103,11 +105,53 @@ def load_data():
     except Exception:
         return DEFAULT_DATA.copy()
 
+def save_to_github(data_dict):
+    """Envia o JSON atualizado diretamente para o repositório do GitHub via API."""
+    if "github" not in st.secrets:
+        return False
+    
+    token = st.secrets["github"]["token"]
+    repo = st.secrets["github"]["repo"]
+    path = "estudo_concursos_data.json"
+    
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+    
+    get_resp = requests.get(url, headers=headers)
+    sha = None
+    if get_resp.status_code == 200:
+        sha = get_resp.json().get("sha")
+    
+    json_str = json.dumps(data_dict, ensure_ascii=False, indent=2)
+    content_encoded = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
+    
+    payload = {
+        "message": "Atualização automática de dados via Streamlit Mobile",
+        "content": content_encoded,
+    }
+    if sha:
+        payload["sha"] = sha
+        
+    put_resp = requests.put(url, headers=headers, json=payload)
+    return put_resp.status_code in [200, 201]
+
 def save_data(data):
     tmp = DATA_FILE.with_suffix(".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     os.replace(tmp, DATA_FILE)
+    
+    try:
+        success = save_to_github(data)
+        if success:
+            st.session_state.last_saved_message = f"Salvo na nuvem (GitHub) às {datetime.now().strftime('%H:%M:%S')}"
+        else:
+            st.session_state.last_saved_message = f"Salvo localmente (Falha API GitHub) às {datetime.now().strftime('%H:%M:%S')}"
+    except Exception as e:
+        st.session_state.last_saved_message = f"Salvo localmente às {datetime.now().strftime('%H:%M:%S')}"
 
 def ensure_session_state():
     if "data" not in st.session_state: st.session_state.data = load_data()
