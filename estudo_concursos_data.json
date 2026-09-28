@@ -64,9 +64,9 @@
       "id": "blk-2026-09-08T21:15:53-0",
       "subject": "Língua Portuguesa",
       "name": "1 Noções Gerais de Compreensão e Interpretação de Texto",
-      "status": "Não iniciado",
-      "accuracy": null,
-      "last_studied": null,
+      "status": "Fazendo Questões",
+      "accuracy": 80.0,
+      "last_studied": "2026-09-27",
       "assunto": "Geral",
       "historico_evolucao": "-",
       "memoria": "⚪ Nunca"
@@ -75,7 +75,7 @@
       "id": "blk-2026-09-08T21:15:53-1",
       "subject": "Língua Portuguesa",
       "name": "2 Tipologia Textual. Gêneros Textuais",
-      "status": "Fazendo Questões",
+      "status": "Não iniciado",
       "accuracy": 100.0,
       "last_studied": "2026-09-25",
       "assunto": "Geral",
@@ -196,9 +196,9 @@
       "id": "blk-2026-09-08T21:15:53-12",
       "subject": "Língua Portuguesa",
       "name": "13. Ortografia, grafia e Novo Acordo",
-      "status": "Não iniciado",
-      "accuracy": 0.0,
-      "last_studied": null,
+      "status": "Estudando Teoria",
+      "accuracy": null,
+      "last_studied": "2026-09-27",
       "assunto": "Geral",
       "historico_evolucao": "-",
       "memoria": "⚪ Nunca"
@@ -820,17 +820,6 @@
       "assunto": "Geral",
       "historico_evolucao": "-",
       "memoria": "⚪ Nunca"
-    },
-    {
-      "id": "top-2026-09-24T22:14:10-0",
-      "subject": "Língua Portuguesa",
-      "assunto": "teste",
-      "name": "teste teste",
-      "status": "Não iniciado",
-      "accuracy": 0.0,
-      "last_studied": null,
-      "historico_evolucao": "-",
-      "memoria": "⚪ Nunca"
     }
   ],
   "study_sessions": [
@@ -881,6 +870,30 @@
       "questions": 0,
       "correct": 0,
       "accuracy": null
+    },
+    {
+      "id": "20260927203432092941",
+      "date": "2026-09-27",
+      "timestamp": "2026-09-27 20:34",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "phase": 1,
+      "minutes": 90.0,
+      "questions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    {
+      "id": "20260927205411617800",
+      "date": "2026-09-27",
+      "timestamp": "2026-09-27 20:54",
+      "subject": "Língua Portuguesa",
+      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "phase": 2,
+      "minutes": 1.0,
+      "questions": 5,
+      "correct": 4,
+      "accuracy": 80.0
     }
   ],
   "errors": [],
@@ -894,6 +907,15 @@
       "interval": "30 dias (100%)",
       "done": false,
       "dismissed": false
+    },
+    {
+      "id": "rev-20260927205411617800",
+      "subject": "Língua Portuguesa",
+      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "due_date": "2026-10-04",
+      "interval": "7 dias (80%)",
+      "done": false,
+      "dismissed": false
     }
   ],
   "resumos": [
@@ -902,45 +924,77 @@
       "date": "2026-09-24",
       "subject": "Língua Portuguesa",
       "topic": "2 Tipologia Textual. Gêneros Textuais",
-      "title": "tipologia-textual",
+      "title": "TIPOS: narração, descrição, argumentativo, espositivo, injuntivo.",
       "content": "",
-      "file_filename": "anexo_20260924201457_tipologia-textual.png"
-    },
-    {
-      "id": "20260924202444009864",
-      "date": "2026-09-24",
-      "subject": "Língua Portuguesa",
-      "topic": "2 Tipologia Textual. Gêneros Textuais",
-      "title": "tipologia-textual",
-      "content": "",
-      "file_filename": "anexo_20260924202444_tipologia-textual2.png"
+      "file_filename": "anexo_20260924201457_tipologia-textual.png",
+      "hits": 1,
+      "misses": 0
     },
     {
       "id": "20260924204641605988",
       "date": "2026-09-24",
       "subject": "Língua Portuguesa",
       "topic": "2 Tipologia Textual. Gêneros Textuais",
-      "title": "generos-textuais",
+      "title": "GÊNEROS TEXTUAIS",
       "content": "",
-      "file_filename": "anexo_20260924204641_generos-textuais.png"
+      "file_filename": "anexo_20260924204641_generos-textuais.png",
+      "hits": 0,
+      "misses": 0
     },
     {
       "id": "20260925203656536677",
       "date": "2026-09-25",
       "subject": "Língua Portuguesa",
       "topic": "2 Tipologia Textual. Gêneros Textuais",
-      "title": "tipologia-bizus",
-      "content": "**TIPO**=ARMAÇÃO LINGUÍSTICA;\n**GÊNERO** = VEÍCULO PRÁTICO DE COMUNICAÇÃO NA SOCIEDADE;\n**DISSERTAÇÃO EXPOSITIVA X DESCRIÇÃO**\nO texto expositivo explica e compartilha informações sobre um assunto, enquanto o texto descritivo detalha as características físicas ou sensoriais de um objeto, pessoa ou lugar.\n**DESCRIÇÃO (com verbos no pretérito) X NARRATIVA**\nO texto descritivo no pretérito paralisa o tempo para retratar uma cena, pessoa ou objeto do passado, enquanto o texto narrativo faz o tempo avançar através de uma sequência de ações dos personagens.\n**PEGADINHA DA PREDOMINÂNCIA:** \nTexto nunca é 100% puro. Exemplo: Textos longos que começa contando uma história (narrativo), passa três parágrafos caracterizando o cenário (descritivo) e terminam com uma opinião (argumentativo). \nO enunciado geralmente pede o tipo PREDOMINANTE. \nPergunte-se: \"Se eu tirasse a descrição ou a narração daqui, o texto ainda cumpriria seu objetivo principal?\". A tipologia vencedora é aquela que carrega a intenção principal do autor. O que define a predominância é a função social e o objetivo final do texto.\n**INSTRUCIONAL INJUNTIVO (INSTRUÇÃO) X INSTRUCIONAL PRESCRITIVO (ORDEM ABSOLUTA)**\nInjuntivo é optativo (receita de bolo, manual). Prescritivo é imposição (lei, contrato)",
-      "file_filename": ""
+      "title": "MACETES",
+      "content": "**TIPO**=ARMAÇÃO LINGUÍSTICA;\n**GÊNERO** = VEÍCULO PRÁTICO DE COMUNICAÇÃO NA SOCIEDADE;\n**DISSERTAÇÃO EXPOSITIVA X DESCRIÇÃO**\nO texto expositivo explica e compartilha informações sobre um assunto, enquanto o texto descritivo detalha as características físicas ou sensoriais de um objeto, pessoa ou lugar.\n**DESCRIÇÃO (com verbos no pretérito) X NARRATIVA**\nO texto descritivo no pretérito paralisa o tempo para retratar uma cena, pessoa ou objeto do passado, enquanto o texto narrativo faz o tempo avançar através de uma sequência de ações dos personagens.\n**PEGADINHA DA PREDOMINÂNCIA:** \nTexto nunca é 100% puro. Exemplo: Textos longos que começam contando uma história (narrativo), passam três parágrafos caracterizando o cenário (descritivo) e terminam com uma opinião (argumentativo). \nO enunciado geralmente pede o tipo PREDOMINANTE. \nPergunte-se: \"Se eu tirasse a descrição ou a narração daqui, o texto ainda cumpriria seu objetivo principal?\". A tipologia vencedora é aquela que carrega a intenção principal do autor. O que define a predominância é a função social e o objetivo final do texto.\n**INSTRUCIONAL INJUNTIVO (INSTRUÇÃO) X INSTRUCIONAL PRESCRITIVO (ORDEM ABSOLUTA)**\nInjuntivo é optativo (receita de bolo, manual). Prescritivo é imposição (lei, contrato)",
+      "file_filename": "",
+      "hits": 0,
+      "misses": 0
     },
     {
       "id": "20260925212140156457",
       "date": "2026-09-25",
       "subject": "Língua Portuguesa",
       "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
-      "title": "bizu-interpretação",
-      "content": "**Recorrência (Repetição)**\nO Bizu: É a retomada da palavra-chave ou do tema central ao longo do texto, seja por sinônimos ou pronomes.\nAção: Identifique a ideia que mais se repete para encontrar o assunto principal.\n**Inferência (Implícito)**\nO Bizu: A resposta não está escrita textualmente, mas o autor deixou pistas lógicas. É ler as entrelinhas.\nPalavras-chave da banca: \"Infere-se...\", \"Depreende-se...\", \"Conclui-se...\".\nAção: Escolha a alternativa que se apoia estritamente nas pistas textuais, sem inventar informações.\n**Compreensão (Explícito)**\nO Bizu: A resposta está escrita de forma direta no texto. É o famoso \"copiar e colar\".\nPalavras-chave da banca: \"Segundo o texto...\", \"O autor afirma...\", \"De acordo com...\".\nAção: Volte ao texto e encontre o trecho exato para confirmar.\n\n**COMPREENSÃO X RECORRÊNCIA**\nCompreensão: É a sua capacidade de encontrar e entender o que está escrito de forma direta no texto. É o resultado da sua leitura. Se o texto diz \"A inflação subiu\", a compreensão garante que você saiba que a inflação aumentou.\nRecorrência: É o mecanismo de repetição que o autor utiliza dentro do texto para reforçar uma ideia. O autor não vai escrever \"inflação\" dez vezes; ele vai usar recorrência por meio de sinônimos ou pronomes (ex: \"A inflação subiu. Esse índice econômico preocupa os analistas, pois ela corrói o poder de compra\"). A recorrência liga as partes do texto para que você consiga exercer a compreensão.\n\n**Os 3 Erros Fatais (Para Eliminar Alternativas)**\n**Extrapolação:** A alternativa traz ideias além do texto, inventando dados.\n**Redução:** A alternativa foca em um detalhe insignificante e ignora o todo.\n**Acrescentar opinião:** assertiva acrescenta opinião não emitida no texto.\n**Contradição: **A alternativa afirma o oposto do que o texto diz.\n**Tangenciar o tema: ** assertiva se relaciona ao texto mas fala de outro assunto.",
-      "file_filename": ""
+      "title": "RECORRÊNCIA; INFERÊNCIA; COMPREENSÃO. // Extrapolação; redução; acrescentar opinião; contradição; tangenciar tema.",
+      "content": "**Recorrência (Repetição)**\nO Bizu: É a retomada da palavra-chave ou do tema central ao longo do texto, seja por sinônimos ou pronomes.\nAção: Identifique a ideia que mais se repete para encontrar o assunto principal.\n**Inferência (Implícito)**\nO Bizu: A resposta não está escrita textualmente, mas o autor deixou pistas lógicas. É ler as entrelinhas.\nPalavras-chave da banca: \"Infere-se...\", \"Depreende-se...\", \"Conclui-se...\".\nAção: Escolha a alternativa que se apoia estritamente nas pistas textuais, sem inventar informações.\n**Compreensão (Explícito)**\nO Bizu: A resposta está escrita de forma direta no texto. É o famoso \"copiar e colar\".\nPalavras-chave da banca: \"Segundo o texto...\", \"O autor afirma...\", \"De acordo com...\".\nAção: Volte ao texto e encontre o trecho exato para confirmar.\n\n**COMPREENSÃO X RECORRÊNCIA**\nCompreensão: É a sua capacidade de encontrar e entender o que está escrito de forma direta no texto. É o resultado da sua leitura. Se o texto diz \"A inflação subiu\", a compreensão garante que você saiba que a inflação aumentou.\nRecorrência: É o mecanismo de repetição que o autor utiliza dentro do texto para reforçar uma ideia. O autor não vai escrever \"inflação\" dez vezes; ele vai usar recorrência por meio de sinônimos ou pronomes (ex: \"A inflação subiu. Esse índice econômico preocupa os analistas, pois ela corrói o poder de compra\"). A recorrência liga as partes do texto para que você consiga exercer a compreensão.\n\n**Os 5 Erros Fatais (Para Eliminar Alternativas)**\n**Extrapolação:** A alternativa traz ideias além do texto, inventando dados.\n**Redução:** A alternativa foca em um detalhe insignificante e ignora o todo.\n**Acrescentar opinião:** assertiva acrescenta opinião não emitida no texto.\n**Contradição: **A alternativa afirma o oposto do que o texto diz.\n**Tangenciar o tema: ** assertiva se relaciona ao texto mas fala de outro assunto.",
+      "file_filename": "",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260927212345893326",
+      "date": "2026-09-27",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "title": "Oxítonas, Monossílabos tônicos, Proparoxítonas, Paroxítonas, Hiato",
+      "content": "",
+      "file_filename": "anexo_20260927212345_1.1 Ortografia_pages-to-jpg-0001.jpg",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260927212443289675",
+      "date": "2026-09-27",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "title": "Acentos diferenciais, Trema, Outras regras",
+      "content": "",
+      "file_filename": "anexo_20260927212443_1.1 Ortografia_pages-to-jpg-0002.jpg",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260927212725841037",
+      "date": "2026-09-27",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "title": "Usos do hífen; proibições; hífen com prefixos",
+      "content": "",
+      "file_filename": "anexo_20260927212725_1.1 Ortografia_pages-to-jpg-0003.jpg",
+      "hits": 0,
+      "misses": 0
     }
   ],
   "flashcards_log": [

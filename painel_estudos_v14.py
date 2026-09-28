@@ -17,8 +17,16 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-DATA_FILE = Path("estudo_concursos_data.json")
-RESUMOS_DIR = Path("resumos")
+# Permitir zoom em celular
+st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+""", unsafe_allow_html=True)
+
+# Pega o diretório exato onde este arquivo .py está salvo
+BASE_DIR = Path(__file__).resolve().parent
+
+DATA_FILE = BASE_DIR / "estudo_concursos_data.json"
+RESUMOS_DIR = BASE_DIR / "resumos"
 RESUMOS_DIR.mkdir(exist_ok=True)
 
 BACKUP_VERSION = "3.2"
@@ -181,6 +189,10 @@ def inject_css():
         .metric-card { padding: 16px; border-radius: 14px; border: 1px solid rgba(128,128,128,.25); background: rgba(128,128,128,.06); }
         .next-card { padding: 22px; border-radius: 18px; border: 2px solid rgba(0, 160, 120, .35); background: rgba(0, 160, 120, .08); }
         .alert-card { padding: 16px; border-radius: 14px; border: 1px solid rgba(220, 60, 60, .35); background: rgba(220, 60, 60, .08); }
+        
+        /* Otimização de altura para os containers de resumos/cards */
+        div[data-baseweb="accordion"] { margin-bottom: 2px !important; }
+        div[data-baseweb="accordion"] > div { border-radius: 6px !important; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -368,11 +380,19 @@ elif page == "📚 Edital":
             s_name = subject["name"]
             s_topics = [t for t in st.session_state.data["topics"] if t["subject"] == s_name]
             
-            with st.expander(f"📖 {s_name} ({len(s_topics)} tópicos cadastrados)"):
-                if not s_topics:
+            # Ordenação numérica dos tópicos (ex: 1-xxx, 2-yyy)
+            def extract_topic_number(t_obj):
+                import re
+                match = re.search(r'^(\d+)', t_obj["name"])
+                return int(match.group(1)) if match else 9999
+            
+            s_topics_sorted = sorted(s_topics, key=extract_topic_number)
+            
+            with st.expander(f"📖 {s_name} ({len(s_topics_sorted)} tópicos cadastrados)"):
+                if not s_topics_sorted:
                     st.info("Nenhum tópico cadastrado nesta disciplina.")
                 else:
-                    for topic in s_topics:
+                    for topic in s_topics_sorted:
                         col_t1, col_t2, col_t3, col_t4 = st.columns([0.1, 0.5, 0.2, 0.2])
                         
                         t_id = topic["id"]
@@ -467,9 +487,9 @@ elif page == "📋 Planilha de Controle":
             last_st = t.get("last_studied")
             dias_passados = (hoje - date.fromisoformat(last_st[:10])).days if (last_st and len(last_st) >= 10) else 999
 
-            # Memória padrão calculada, mas que agora poderá ser editada na tabela
+            # Lógica automática para a coluna Memória baseada nos dias passados desde o último estudo
             default_memoria = t.get("memoria", "")
-            if not default_memoria:
+            if not default_memoria or t.get("last_studied_updated_dynamically", True):
                 if dias_passados == 999:
                     default_memoria = "⚪ Nunca"
                 elif dias_passados <= 15:
@@ -494,11 +514,10 @@ elif page == "📋 Planilha de Controle":
 
         df_ctrl = pd.DataFrame(ctrl_rows)
 
-        # Tabela 100% editável (agora com Status e Memoria como dropdowns)
         edited_df = st.data_editor(
             df_ctrl,
             column_config={
-                "id": None, # Oculta a coluna de ID interna
+                "id": None,
                 "Status": st.column_config.SelectboxColumn(
                     "Status",
                     options=STATUS_OPTIONS,
@@ -564,7 +583,7 @@ elif page == "📋 Planilha de Controle":
                 
                 if len(aud_sess) > 1:
                     fig_evo = px.line(aud_sess, x="timestamp", y="accuracy", markers=True, title=f"Curva de Aprendizado — {sel_top}")
-                    fig_evo.update_yaxes(range=[0, 105]) # Corrigido de update_yaxis para update_yaxes
+                    fig_evo.update_yaxes(range=[0, 105])
                     st.plotly_chart(fig_evo, use_container_width=True)
             else:
                 st.info("Nenhuma sessão registrada com detalhamento para este tópico.")
@@ -577,7 +596,6 @@ elif page == "📋 Planilha de Controle":
         if not sessions_list:
             st.info("Nenhuma sessão de estudo registrada até o momento.")
         else:
-            # Mostra as últimas 15 sessões registradas (da mais recente para a mais antiga)
             recent_sessions = list(reversed(sessions_list[-15:]))
             
             for s in recent_sessions:
@@ -595,19 +613,16 @@ elif page == "📋 Planilha de Controle":
                 
                 with col_sess2:
                     if st.button("🗑️ Excluir", key=f"del_sess_{s_id}", use_container_width=True):
-                        # 1. Guarda os dados da sessão antes de apagar para achar o tópico correspondente
                         target_session = next((sess for sess in st.session_state.data["study_sessions"] if sess.get("id") == s_id), None)
                         
                         if target_session:
                             t_subj = target_session.get("subject")
                             t_top = target_session.get("topic")
                             
-                            # 2. Remove a sessão da lista
                             st.session_state.data["study_sessions"] = [
                                 sess for sess in st.session_state.data["study_sessions"] if sess.get("id") != s_id
                             ]
                             
-                            # 3. Atualiza ou limpa os dados do tópico na planilha de controle
                             remaining_sessions = [
                                 sess for sess in st.session_state.data["study_sessions"] 
                                 if sess.get("subject") == t_subj and sess.get("topic") == t_top
@@ -616,18 +631,25 @@ elif page == "📋 Planilha de Controle":
                             for t in st.session_state.data["topics"]:
                                 if t["subject"] == t_subj and t["name"] == t_top:
                                     if remaining_sessions:
-                                        # Se ainda há sessões, pega a mais recente restante
                                         remaining_sorted = sorted(remaining_sessions, key=lambda x: x.get("timestamp", x.get("date", "")))
                                         latest_sess = remaining_sorted[-1]
                                         
                                         t["last_studied"] = latest_sess.get("date")
+                                        dias_calc = (date.today() - date.fromisoformat(latest_sess.get("date")[:10])).days
+                                        if dias_calc <= 15:
+                                            t["memoria"] = "🟢 Em dia (≤15d)"
+                                        elif dias_calc <= 30:
+                                            t["memoria"] = "🟡 Atenção (16-30d)"
+                                        else:
+                                            t["memoria"] = "🔴 Urgente (>30d)"
+
                                         if latest_sess.get("accuracy") is not None:
                                             t["accuracy"] = latest_sess.get("accuracy")
                                     else:
-                                        # Se era a única sessão do tópico, limpa os registros
                                         t["last_studied"] = None
                                         t["accuracy"] = None
                                         t["status"] = "Não iniciado"
+                                        t["memoria"] = "⚪ Nunca"
                             
                             persist()
                             st.success("Sessão excluída e planilha de controle atualizada com sucesso!")
@@ -711,7 +733,6 @@ elif page == "▶️ Estudar":
                 topic_sel = st.selectbox("Tópico Abordado", topics_for_subj if topics_for_subj else ["Nenhum tópico cadastrado"])
                 phase_num = st.selectbox("Fase", [1, 2, 3], format_func=lambda x: f"Fase {x} — {PHASES[x]}")
                 
-                # Campo opcional para preencher o Status diretamente ao registrar
                 status_registro = st.selectbox("Status Atualizar na Planilha", STATUS_OPTIONS, index=4)
 
                 default_mins = round(st.session_state.timer_seconds / 60, 1) if st.session_state.timer_seconds > 0 else 90.0
@@ -745,11 +766,10 @@ elif page == "▶️ Estudar":
                         "accuracy": acc,
                     })
 
-                    # Atualiza o tópico correspondente na planilha de controle
                     for t in st.session_state.data["topics"]:
                         if t["subject"] == subject_sel and t["name"] == topic_sel:
                             t["last_studied"] = session_date_str
-                            t["status"] = status_registro # Define o status escolhido no menu Estudar
+                            t["status"] = status_registro
                             if acc is not None:
                                 t["accuracy"] = acc
 
@@ -798,7 +818,7 @@ elif page == "❌ Erros":
         with st.form("error_form"):
             err_top = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_err)
             err_reason = st.selectbox("Por que errei?", ERROR_REASONS)
-            err_solution = st.text_area("O que preciso lembrar / Solução")
+            err_solution = st.text_area("O que preciso lembrar / Solução (Pressione Enter para saltar linhas)")
             
             uploaded_err_file = st.file_uploader(
                 "Anexar arquivo de apoio (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
@@ -898,7 +918,7 @@ elif page == "❌ Erros":
                                         solution_html = formatted_solution.replace("\n", "<br>")
                                         
                                         st.markdown(f"""
-                                        <div style="background-color: rgba(128,128,128,0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(128,128,128,0.2);">
+                                        <div style="background-color: rgba(128,128,128,0.08); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(128,128,128,0.2);">
                                             {solution_html}
                                         </div>
                                         """, unsafe_allow_html=True)
@@ -932,11 +952,11 @@ elif page == "❌ Erros":
 
                             with col_card2:
                                 st.markdown("<br>", unsafe_allow_html=True)
-                                if st.button("✏️ Editar", key=f"edit_err_btn_{e_id}"):
+                                if st.button("✏️", key=f"edit_err_btn_{e_id}", help="Editar Erro"):
                                     st.session_state.editing_error_id = e_id
                                     st.rerun()
                                     
-                                if st.button("🗑️ Excluir", key=f"del_err_{e_id}"):
+                                if st.button("🗑️", key=f"del_err_{e_id}", help="Excluir Erro"):
                                     if file_fn and not pd.isna(file_fn):
                                         f_path = ANEXOS_DIR / file_fn
                                         if f_path.exists():
@@ -957,34 +977,41 @@ elif page == "❌ Erros":
 # ============================================================
 elif page == "📝 Mapas e Resumos":
     st.title("📝 Mapas & Resumos")
-    st.caption("Organize seus resumos, mapas mentais e documentos com pré-visualização de textos e suporte a edição.")
+    st.caption("Organize os seus resumos e mapas mentais com tópicos retráteis, reordenação e métricas individuais.")
 
     if "editing_resumo_id" not in st.session_state:
         st.session_state.editing_resumo_id = None
 
-    ANEXOS_DIR = Path("anexos_estudos")
+    ANEXOS_DIR = BASE_DIR / "anexos_estudos"
     ANEXOS_DIR.mkdir(exist_ok=True)
 
-    with st.expander("➕ Adicionar Novo Resumo / Arquivo"):
+    if "resumos" in st.session_state.data:
+        for item in st.session_state.data["resumos"]:
+            if "hits" not in item:
+                item["hits"] = 0
+            if "misses" not in item:
+                item["misses"] = 0
+
+    with st.expander("➕ Adicionar Novo Resumo / Mapa"):
         res_subj = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]], key="res_s_cad")
         topics_res = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == res_subj]
 
         with st.form("resumo_form"):
             res_top = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_res)
-            res_title = st.text_input("Título / Descrição", placeholder="Ex.: Fórmulas de Curto-Circuito ou Resumo PDF")
-            res_content = st.text_area("Texto do Resumo / Anotações (Opcional se enviar anexo)")
+            res_title = st.text_area("Título / Descrição (Pressione Enter para saltar linhas)", placeholder="Ex.: Fórmulas de Curto-Circuito ou Resumo PDF")
+            res_content = st.text_area("Texto do Resumo / Anotações (Use **negrito** ou __sublinhado__)", placeholder="Pressione Enter para saltar linhas. **Negrito** e __sublinhado__ ficarão destacados em amarelo.")
             
             uploaded_file = st.file_uploader(
-                "Anexar arquivo (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
+                "Anexar ficheiro (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
                 type=["png", "jpg", "jpeg", "pdf", "txt", "doc", "docx", "ppt", "pptx"], 
                 key="res_file_up"
             )
 
-            if st.form_submit_button("💾 Salvar Resumo / Arquivo", use_container_width=True):
+            if st.form_submit_button("💾 Salvar Resumo / Mapa", use_container_width=True):
                 if not res_title.strip():
                     st.error("Informe um título ou descrição para o resumo.")
                 elif not res_content.strip() and uploaded_file is None:
-                    st.error("Você deve preencher o texto OU enviar um arquivo/anexo.")
+                    st.error("Deve preencher o texto OU enviar um ficheiro/anexo.")
                 else:
                     file_filename = ""
                     if uploaded_file is not None:
@@ -1000,20 +1027,21 @@ elif page == "📝 Mapas e Resumos":
                         "topic": res_top if res_top != "Nenhum" else "Geral",
                         "title": res_title.strip(),
                         "content": res_content.strip(),
-                        "file_filename": file_filename
+                        "file_filename": file_filename,
+                        "hits": 0,
+                        "misses": 0
                     })
                     persist()
-                    st.success("Resumo/Arquivo salvo com sucesso!")
+                    st.success("Resumo/Mapa guardado com sucesso!")
                     st.rerun()
 
     st.divider()
 
     resumos_list = st.session_state.data.get("resumos", [])
     if not resumos_list:
-        st.info("Nenhum resumo ou arquivo cadastrado.")
+        st.info("Nenhum resumo ou mapa cadastrado.")
     else:
         rdf = pd.DataFrame(resumos_list)
-        st.metric("Total de itens cadastrados", len(rdf))
 
         f_sub_res = st.selectbox("Filtrar por Disciplina (Opcional)", ["Todas"] + sorted(rdf["subject"].unique().tolist()), key="f_sub_res")
         view_res = rdf if f_sub_res == "Todas" else rdf[rdf["subject"] == f_sub_res]
@@ -1022,7 +1050,7 @@ elif page == "📝 Mapas e Resumos":
 
         materias_com_res = sorted(view_res["subject"].unique().tolist())
         if not materias_com_res:
-            st.info("Nenhum registro encontrado para o filtro selecionado.")
+            st.info("Nenhum registo encontrado para o filtro selecionado.")
         else:
             for materia in materias_com_res:
                 df_materia_res = view_res[view_res["subject"] == materia]
@@ -1030,34 +1058,194 @@ elif page == "📝 Mapas e Resumos":
 
                 with st.expander(f"📚 {materia} ({total_res_mat} ite{'ns' if total_res_mat > 1 else 'm'})", expanded=(f_sub_res != "Todas")):
                     df_materia_res["topic"] = df_materia_res["topic"].apply(lambda x: x if (x and str(x).strip() and str(x) != "nan") else "Geral")
-                    topicos_na_mat_res = sorted(df_materia_res["topic"].unique().tolist())
+                    
+                    # Função para ordenar os tópicos numericamente (ex: 1, 2, ..., 13)
+                    def sort_topics_key(topic_str):
+                        import re
+                        match = re.search(r'(\d+)', str(topic_str))
+                        return int(match.group(1)) if match else 9999
+
+                    topicos_na_mat_res = sorted(df_materia_res["topic"].unique().tolist(), key=sort_topics_key)
 
                     for topico in topicos_na_mat_res:
                         df_topico_res = df_materia_res[df_materia_res["topic"] == topico]
-                        st.markdown(f"#### 🔹 Tópico: **{topico}**")
                         
-                        for _, r in df_topico_res.iterrows():
-                            r_id = r["id"]
-                            r_title = r["title"]
-                            r_dt = r["date"]
-                            r_content = r.get("content", "")
-                            file_fn = r.get("file_filename", "")
+                        with st.expander(f"🔹 Tópico: {topico}"):
+                            
+                            topic_res_items = df_topico_res.to_dict("records")
+                            
+                            for idx, r in enumerate(topic_res_items):
+                                r_id = r["id"]
+                                r_title = r["title"]
+                                r_dt = r["date"]
+                                r_content = r.get("content", "")
+                                file_fn = r.get("file_filename", "")
+                                r_hits = r.get("hits", 0)
+                                r_miss = r.get("misses", 0)
 
-                            col_rc1, col_rc2 = st.columns([5, 1])
-                            with col_rc1:
+                                col_rc1, col_rc_btns = st.columns([4.2, 1.8])
+                                
+                                with col_rc1:
+                                    tot_card = r_hits + r_miss
+                                    pct_card = f"{(r_hits/tot_card*100):.0f}%" if tot_card > 0 else "Sem reg."
+                                    
+                                    with st.expander(f"💡 {r_title}  |  🎯 Acertos: {pct_card} (✅ {r_hits} | ❌ {r_miss})"):
+                                        if r_content:
+                                            import re
+                                            formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b style="color: #f59e0b;">\1</b>', r_content)
+                                            formatted_content = re.sub(r'__(.*?)__', r'<u style="color: #f59e0b; text-decoration: underline;">\1</u>', formatted_content)
+                                            content_html = formatted_content.replace("\n", "<br>")
+                                            
+                                            st.markdown(f"""
+                                            <div style="background-color: rgba(128,128,128,0.08); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(128,128,128,0.2); margin-bottom: 6px;">
+                                                {content_html}
+                                            </div>
+                                            """, unsafe_allow_html=True)
+                                        
+                                        if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
+                                            full_file_path = ANEXOS_DIR / file_fn
+                                            if full_file_path.exists():
+                                                ext = full_file_path.suffix.lower()
+                                                if ext in [".png", ".jpg", ".jpeg"]:
+                                                    st.image(str(full_file_path), caption=r_title, use_container_width=True)
+                                                elif ext == ".txt":
+                                                    try:
+                                                        with open(full_file_path, "r", encoding="utf-8") as txt_file:
+                                                            txt_data = txt_file.read()
+                                                        st.code(txt_data, language="text")
+                                                    except Exception:
+                                                        st.error("Não foi possível ler o ficheiro de texto.")
+                                                
+                                                icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                                icon = icon_map.get(ext, "📎")
+                                                orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
+                                                
+                                                with open(full_file_path, "rb") as file_bytes:
+                                                    st.download_button(
+                                                        label=f"{icon} Descarregar anexo: {orig_name}",
+                                                        data=file_bytes,
+                                                        file_name=orig_name,
+                                                        mime="application/octet-stream",
+                                                        key=f"dl_{r_id}"
+                                                    )
+
+                                        st.markdown("<hr style='margin:4px 0;'>", unsafe_allow_html=True)
+                                        st.markdown("<small><b>Avalie a sua recordação deste conceito:</b></small>", unsafe_allow_html=True)
+                                        b_col1, b_col2 = st.columns(2)
+                                        with b_col1:
+                                            if st.button("✅ Acertei", key=f"hit_{r_id}", use_container_width=True):
+                                                for item in st.session_state.data["resumos"]:
+                                                    if item["id"] == r_id:
+                                                        item["hits"] = item.get("hits", 0) + 1
+                                                persist()
+                                                st.rerun()
+                                        with b_col2:
+                                            if st.button("❌ Errei", key=f"miss_{r_id}", use_container_width=True):
+                                                for item in st.session_state.data["resumos"]:
+                                                    if item["id"] == r_id:
+                                                        item["misses"] = item.get("misses", 0) + 1
+                                                persist()
+                                                st.rerun()
+
+                                with col_rc_btns:
+                                    b_up, b_down, b_edit, b_del = st.columns(4)
+                                    
+                                    with b_up:
+                                        if idx > 0:
+                                            if st.button("⬆️", key=f"up_{r_id}", help="Mover para cima"):
+                                                full_res_list = st.session_state.data["resumos"]
+                                                curr_idx_global = next(i for i, item in enumerate(full_res_list) if item["id"] == r_id)
+                                                prev_id = topic_res_items[idx - 1]["id"]
+                                                prev_idx_global = next(i for i, item in enumerate(full_res_list) if item["id"] == prev_id)
+                                                
+                                                full_res_list[curr_idx_global], full_res_list[prev_idx_global] = full_res_list[prev_idx_global], full_res_list[curr_idx_global]
+                                                persist()
+                                                st.rerun()
+                                                
+                                    with b_down:
+                                        if idx < len(topic_res_items) - 1:
+                                            if st.button("⬇️", key=f"down_{r_id}", help="Mover para baixo"):
+                                                full_res_list = st.session_state.data["resumos"]
+                                                curr_idx_global = next(i for i, item in enumerate(full_res_list) if item["id"] == r_id)
+                                                next_id = topic_res_items[idx + 1]["id"]
+                                                next_idx_global = next(i for i, item in enumerate(full_res_list) if item["id"] == next_id)
+                                                
+                                                full_res_list[curr_idx_global], full_res_list[next_idx_global] = full_res_list[next_idx_global], full_res_list[curr_idx_global]
+                                                persist()
+                                                st.rerun()
+                                                
+                                    with b_edit:
+                                        if st.button("✏️", key=f"edit_res_btn_{r_id}", help="Editar Resumo"):
+                                            st.session_state.editing_resumo_id = r_id
+                                            st.rerun()
+                                            
+                                    with b_del:
+                                        if st.button("🗑️", key=f"del_res_{r_id}", help="Eliminar Resumo"):
+                                            if file_fn and not pd.isna(file_fn):
+                                                f_path = ANEXOS_DIR / file_fn
+                                                if f_path.exists():
+                                                    try: f_path.unlink()
+                                                    except Exception: pass
+
+                                            st.session_state.data["resumos"] = [item for item in st.session_state.data["resumos"] if item["id"] != r_id]
+                                            persist()
+                                            st.success("Item eliminado!")
+                                            st.rerun()
+
                                 if st.session_state.editing_resumo_id == r_id:
                                     with st.form(f"edit_res_form_{r_id}"):
-                                        st.markdown(f"**Editando Resumo**")
-                                        new_edit_title = st.text_input("Título / Descrição", value=r_title)
+                                        st.markdown(f"**Editando Resumo / Mapa**")
+                                        new_edit_title = st.text_area("Título / Descrição", value=r_title)
                                         new_edit_content = st.text_area("Texto / Anotações", value=r_content)
+                                        
+                                        st.markdown("---")
+                                        st.markdown(f"**Anexo atual:** `{file_fn if file_fn else 'Nenhum'}`")
+                                        action_anexo = st.radio(
+                                            "O que deseja fazer com o anexo?",
+                                            ["Manter anexo atual", "Remover anexo", "Substituir por novo anexo"],
+                                            key=f"action_anexo_{r_id}"
+                                        )
+                                        
+                                        new_uploaded_file = None
+                                        if action_anexo == "Substituir por novo anexo":
+                                            new_uploaded_file = st.file_uploader(
+                                                "Enviar novo ficheiro", 
+                                                type=["png", "jpg", "jpeg", "pdf", "txt", "doc", "docx", "ppt", "pptx"], 
+                                                key=f"new_file_up_{r_id}"
+                                            )
                                         
                                         col_rs1, col_rs2 = st.columns(2)
                                         with col_rs1:
                                             if st.form_submit_button("💾 Salvar", use_container_width=True):
+                                                final_file_name = file_fn
+                                                
+                                                if action_anexo == "Remover anexo":
+                                                    if file_fn:
+                                                        old_path = ANEXOS_DIR / file_fn
+                                                        if old_path.exists():
+                                                            try: old_path.unlink()
+                                                            except Exception: pass
+                                                    final_file_name = ""
+                                                
+                                                elif action_anexo == "Substituir por novo anexo":
+                                                    if new_uploaded_file is not None:
+                                                        if file_fn:
+                                                            old_path = ANEXOS_DIR / file_fn
+                                                            if old_path.exists():
+                                                                try: old_path.unlink()
+                                                                except Exception: pass
+                                                        
+                                                        final_file_name = f"anexo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{new_uploaded_file.name}"
+                                                        new_path = ANEXOS_DIR / final_file_name
+                                                        with open(new_path, "wb") as f:
+                                                            f.write(new_uploaded_file.getbuffer())
+
                                                 for item in st.session_state.data["resumos"]:
                                                     if item["id"] == r_id:
                                                         item["title"] = new_edit_title.strip()
                                                         item["content"] = new_edit_content.strip()
+                                                        item["file_filename"] = final_file_name
+                                                
                                                 persist()
                                                 st.session_state.editing_resumo_id = None
                                                 st.success("Atualizado com sucesso!")
@@ -1066,67 +1254,61 @@ elif page == "📝 Mapas e Resumos":
                                             if st.form_submit_button("❌ Cancelar", use_container_width=True):
                                                 st.session_state.editing_resumo_id = None
                                                 st.rerun()
-                                else:
-                                    st.markdown(f"**{r_title}** *(Criado em {r_dt})*")
-                                    if r_content:
-                                        import re
-                                        # Converte **texto** em <b>texto</b> automaticamente
-                                        formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b style="color: #f59e0b; text-decoration: underline;">\1</b>', r_content)
-                                        content_html = formatted_content.replace("\n", "<br>")
-                                        
-                                        st.markdown(f"""
-                                        <div style="background-color: rgba(128,128,128,0.08); padding: 12px; border-radius: 8px; border: 1px solid rgba(128,128,128,0.2);">
-                                            {content_html}
-                                        </div>
-                                        """, unsafe_allow_html=True)
-                                    
-                                    if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
-                                        full_file_path = ANEXOS_DIR / file_fn
-                                        if full_file_path.exists():
-                                            ext = full_file_path.suffix.lower()
-                                            if ext in [".png", ".jpg", ".jpeg"]:
-                                                st.image(str(full_file_path), caption=r_title, use_container_width=True)
-                                            elif ext == ".txt":
-                                                try:
-                                                    with open(full_file_path, "r", encoding="utf-8") as txt_file:
-                                                        txt_data = txt_file.read()
-                                                    st.code(txt_data, language="text")
-                                                except Exception:
-                                                    st.error("Não foi possível ler o arquivo de texto.")
-                                            
-                                            icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
-                                            icon = icon_map.get(ext, "📎")
-                                            orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
-                                            
-                                            with open(full_file_path, "rb") as file_bytes:
-                                                st.download_button(
-                                                    label=f"{icon} Baixar anexo: {orig_name}",
-                                                    data=file_bytes,
-                                                    file_name=orig_name,
-                                                    mime="application/octet-stream",
-                                                    key=f"dl_{r_id}"
-                                                )
+                            st.markdown("---")
 
-                            with col_rc2:
-                                st.markdown("<br>", unsafe_allow_html=True)
-                                if st.button("✏️ Editar", key=f"edit_res_btn_{r_id}"):
-                                    st.session_state.editing_resumo_id = r_id
-                                    st.rerun()
-                                    
-                                if st.button("🗑️ Excluir", key=f"del_res_{r_id}"):
-                                    if file_fn and not pd.isna(file_fn):
-                                        f_path = ANEXOS_DIR / file_fn
-                                        if f_path.exists():
-                                            try:
-                                                f_path.unlink()
-                                            except Exception:
-                                                pass
+    st.divider()
+    st.subheader("📊 Desempenho de Recordação (Geral & Tópicos)")
+    
+    # Função para ordenar os tópicos numericamente na tabela (ex: 1, 2, ..., 13)
+    def sort_topics_key(topic_str):
+        import re
+        match = re.search(r'(\d+)', str(topic_str))
+        return int(match.group(1)) if match else 9999
 
-                                    st.session_state.data["resumos"] = [item for item in st.session_state.data["resumos"] if item["id"] != r_id]
-                                    persist()
-                                    st.success("Item excluído!")
-                                    st.rerun()
-                        st.markdown("---")
+    perf_rows = []
+    for mat in sorted(rdf["subject"].unique()):
+        df_m = rdf[rdf["subject"] == mat]
+        tot_hits_mat = df_m["hits"].sum() if "hits" in df_m.columns else 0
+        tot_miss_mat = df_m["misses"].sum() if "misses" in df_m.columns else 0
+        tot_rev_mat = tot_hits_mat + tot_miss_mat
+        acc_mat = (tot_hits_mat / tot_rev_mat * 100) if tot_rev_mat > 0 else 0.0
+        
+        perf_rows.append({
+            "Categoria / Assunto": f"📚 [Disciplina] {mat}",
+            "Total Itens": len(df_m),
+            "Revisões": tot_rev_mat,
+            "Acertos": int(tot_hits_mat),
+            "Erros": int(tot_miss_mat),
+            "Taxa de Acerto (%)": float(acc_mat)
+        })
+        
+        df_m["topic"] = df_m["topic"].apply(lambda x: x if (x and str(x).strip() and str(x) != "nan") else "Geral")
+        
+        # Ordena os tópicos usando a função numérica
+        sorted_topics = sorted(df_m["topic"].unique().tolist(), key=sort_topics_key)
+        
+        for top in sorted_topics:
+            df_t = df_m[df_m["topic"] == top]
+            tot_hits_top = df_t["hits"].sum() if "hits" in df_t.columns else 0
+            tot_miss_top = df_t["misses"].sum() if "misses" in df_t.columns else 0
+            tot_rev_top = tot_hits_top + tot_miss_top
+            acc_top = (tot_hits_top / tot_rev_top * 100) if tot_rev_top > 0 else 0.0
+            
+            perf_rows.append({
+                "Categoria / Assunto": f"  🔹 {top}",
+                "Total Itens": len(df_t),
+                "Revisões": tot_rev_top,
+                "Acertos": int(tot_hits_top),
+                "Erros": int(tot_miss_top),
+                "Taxa de Acerto (%)": float(acc_top)
+            })
+
+    st.dataframe(
+        pd.DataFrame(perf_rows),
+        column_config={"Taxa de Acerto (%)": st.column_config.ProgressColumn(format="%.1f%%", min_value=0, max_value=100)},
+        hide_index=True,
+        use_container_width=True
+    )
 
 
 # ============================================================
