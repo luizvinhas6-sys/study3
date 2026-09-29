@@ -65,11 +65,11 @@
       "subject": "Língua Portuguesa",
       "name": "1 Noções Gerais de Compreensão e Interpretação de Texto",
       "status": "Fazendo Questões",
-      "accuracy": 80.0,
-      "last_studied": "2026-09-27",
+      "accuracy": 50.0,
+      "last_studied": "2026-09-28",
       "assunto": "Geral",
       "historico_evolucao": "-",
-      "memoria": "⚪ Nunca"
+      "memoria": "🟢 Em dia (≤15d)"
     },
     {
       "id": "blk-2026-09-08T21:15:53-1",
@@ -197,11 +197,11 @@
       "subject": "Língua Portuguesa",
       "name": "13. Ortografia, grafia e Novo Acordo",
       "status": "Fazendo Questões",
-      "accuracy": 78.94736842105263,
+      "accuracy": 9.090909090909092,
       "last_studied": "2026-09-28",
       "assunto": "Geral",
       "historico_evolucao": "-",
-      "memoria": "⚪ Nunca"
+      "memoria": "🟢 Em dia (≤15d)"
     },
     {
       "id": "blk-2026-09-08T21:15:53-13",
@@ -906,6 +906,30 @@
       "questions": 19,
       "correct": 15,
       "accuracy": 78.94736842105263
+    },
+    {
+      "id": "20260928195550458852",
+      "date": "2026-09-28",
+      "timestamp": "2026-09-28 19:55",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "phase": 2,
+      "minutes": 40.0,
+      "questions": 11,
+      "correct": 1,
+      "accuracy": 9.090909090909092
+    },
+    {
+      "id": "20260928195613813794",
+      "date": "2026-09-28",
+      "timestamp": "2026-09-28 19:56",
+      "subject": "Língua Portuguesa",
+      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "phase": 2,
+      "minutes": 25.0,
+      "questions": 6,
+      "correct": 3,
+      "accuracy": 50.0
     }
   ],
   "errors": [
@@ -972,6 +996,24 @@
       "topic": "13. Ortografia, grafia e Novo Acordo",
       "due_date": "2026-10-05",
       "interval": "7 dias (79%)",
+      "done": false,
+      "dismissed": false
+    },
+    {
+      "id": "rev-20260928195550458852",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "due_date": "2026-09-30",
+      "interval": "2 dias (9%)",
+      "done": false,
+      "dismissed": false
+    },
+    {
+      "id": "rev-20260928195613813794",
+      "subject": "Língua Portuguesa",
+      "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
+      "due_date": "2026-09-30",
+      "interval": "2 dias (50%)",
       "done": false,
       "dismissed": false
     }
@@ -1060,8 +1102,96 @@
       "subject": "Língua Portuguesa",
       "topic": "13. Ortografia, grafia e Novo Acordo",
       "title": "Hífen e não prefixos",
-      "content": "O vocábulo \"etno-históricos\" pode ser corretamente grafado, de acordo com as regras ortográficas vigentes, sem o hífen, desde que seja eliminada a letra h, assim como ocorre com a palavra coabitar.  Errado!\n\nA analogia com \"coabitar\" não é correta porque \"co-\" e \"etno-\" pertencem a categorias morfológicas distintas.\n\n\"Co-\" é um prefixo em sentido estrito. A regra aplicável é: prefixo terminado em vogal + segundo elemento iniciado por h → suprime-se o h e escreve-se sem hífen.\n\nPor isso \"co+habitar\" → \"coabitar\", \"des+humanizar\" → \"desumano\", e assim por diante. Nenhum hífen, nenhum h.\n\n\"Etno-\" não é prefixo: é elemento de composição (ou prefixoide) de origem grega. Para esses elementos, a regra é outra: quando o segundo elemento se inicia por h, o hífen é mantido. A supressão do h e a eliminação do hífen não se aplicam aqui. A grafia correta permanece \"etno-históricos\", com hífen.\n\nO mesmo raciocínio vale para formas como \"bio-histórico\", \"geo-histórico\", \"hidro-histórico\".\n\nA semelhança superficial, prefixo/elemento terminado em vogal + palavra com h, oculta a diferença de categoria que determina a regra aplicável.\n\nNão é possível grafar \"etnoistóricos\" (suprimindo o h) nem \"etnohistóricos\" (sem hífen e sem suprimir o h) como formas correntes.",
+      "content": "A grafia correta é etno-históricos (com hífen), pois \"etno-\" é um elemento de composição e não um prefixo.\n• Prefixos (como co-): perdem o hífen e o h inicial do segundo termo (coabitar).\n• Elementos de composição (como etno-, bio-, geo-): mantêm o hífen diante de palavras iniciadas por h (etno-históricos, bio-histórico).",
       "file_filename": "",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928201031037381",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "title": "Hiato - voo - rainha - feiura // juiz - ruim",
+      "content": "Se “i” ou “u” antecedido de ditongo, e a palavra não for oxítona, não acentua.\njuiz - ruim: u/i tônico não está sozinho!",
+      "file_filename": "",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928211054550325",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "3 Coesão e coerência",
+      "title": "COESÃO X COERÊNCIA",
+      "content": "",
+      "file_filename": "anexo_20260928211054_coesao-coerencia.png",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928211921566162",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "7 Funções da Linguagem(ex: emotiva, apelativa, referencial, metalinguística, fática e poética)",
+      "title": "EMOTIVA // APELATIVA // REFERENCIAL // METALINGUÍSTICA // FÁTICA // POÉTICA",
+      "content": "",
+      "file_filename": "anexo_20260928211921_funcoes-da-linguagem-mapa-mental-6.png",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928213345050065",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "6. Multimodalidade",
+      "title": "MULTIMODALIDADE",
+      "content": "",
+      "file_filename": "anexo_20260928213345_multimodalidade.png",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928213840003019",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "5 Variação Linguística; linguagem formal e informal",
+      "title": "VARIEDADES LINGUÍSTICAS E COMUNICAÇÃO",
+      "content": "",
+      "file_filename": "anexo_20260928213840_variedades-linguisticas-e-comunicacao.png",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928214139605908",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "6. Multimodalidade",
+      "title": "TEXTOS MULTIMODAIS",
+      "content": "",
+      "file_filename": "anexo_20260928214139_textos-multimodais.png",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928214638813863",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "4 Redação - Reescritura de texto (Oralidade e escrita: processos de retextualização)",
+      "title": "PROCESSO DE RETEXTUALIZAÇÃO",
+      "content": "",
+      "file_filename": "anexo_20260928214638_retextualização.png",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20260928215640594675",
+      "date": "2026-09-28",
+      "subject": "Língua Portuguesa",
+      "topic": "8 Intertextualidade",
+      "title": "INTERTEXTUALIDADE",
+      "content": "",
+      "file_filename": "anexo_20260928215640_intertextualidade.png",
       "hits": 0,
       "misses": 0
     }
