@@ -19,6 +19,41 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Permitir zoom em dispositivos móveis e bloquear indexação pelo Google
+st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="robots" content="noindex, nofollow">
+""", unsafe_allow_html=True)
+
+# ============================================================
+# SISTEMA DE PROTEÇÃO POR SENHA
+# ============================================================
+def check_password():
+    """Retorna True se o usuário inserir a senha correta."""
+    def password_entered():
+        # Altere "230689" para a senha que você preferir usar
+        if st.session_state["password_input"] == "230689":
+            st.session_state["password_correct"] = True
+            del st.session_state["password_input"]  # Remove a senha da sessão por segurança
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        st.title("🔒 Acesso Restrito")
+        st.text_input("Digite a senha de acesso ao painel:", type="password", on_change=password_entered, key="password_input")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.title("🔒 Acesso Restrito")
+        st.text_input("Digite a senha de acesso ao painel:", type="password", on_change=password_entered, key="password_input")
+        st.error("❌ Senha incorreta. Tente novamente.")
+        return False
+    else:
+        return True
+
+# Bloqueia a execução do painel se a senha não estiver correta
+if not check_password():
+    st.stop()
+
 # Permitir zoom em dispositivos móveis
 st.markdown("""
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -300,10 +335,39 @@ if page == "🏠 Painel":
         if rev_due_today:
             st.markdown(f"""
             <div class="alert-card">
-                <h4>🔄 Revisões Pendentes</h4>
-                <p>Você tem <b>{len(rev_due_today)}</b> revisões espaçadas para realizar hoje ou em atraso.</p>
+                <h4>🔄 Revisões Pendentes ({len(rev_due_today)})</h4>
+                <p>Você tem revisões espaçadas para realizar hoje ou em atraso.</p>
             </div>
             """, unsafe_allow_html=True)
+            
+            # --- LISTAGEM PRÁTICA DAS REVISÕES PENDENTES ---
+            with st.expander("🔍 Ver lista detalhada de revisões pendentes", expanded=True):
+                for rev in rev_due_today:
+                    r_id = rev["id"]
+                    r_subj = rev["subject"]
+                    r_top = rev["topic"]
+                    r_due = rev["due_date"]
+                    r_interval = rev.get("interval", "")
+
+                    col_r1, col_r2, col_r3 = st.columns([3, 1, 1])
+                    with col_r1:
+                        st.markdown(f"**{r_subj}** ➔ *{r_top}* <br><small>Vencimento: {r_due} | {r_interval}</small>", unsafe_allow_html=True)
+                    with col_r2:
+                        if st.button("✅ Feito", key=f"done_rev_{r_id}", use_container_width=True):
+                            for item in st.session_state.data["reviews"]:
+                                if item["id"] == r_id:
+                                    item["done"] = True
+                            persist()
+                            st.success("Revisão concluída!")
+                            st.rerun()
+                    with col_r3:
+                        if st.button("❌ Ignorar", key=f"dismiss_rev_{r_id}", use_container_width=True):
+                            for item in st.session_state.data["reviews"]:
+                                if item["id"] == r_id:
+                                    item["dismissed"] = True
+                            persist()
+                            st.rerun()
+                    st.markdown("---")
         else:
             st.markdown(f"""
             <div class="next-card">
@@ -810,23 +874,32 @@ elif page == "▶️ Estudar":
                                 t["accuracy"] = acc
 
                     if questions > 0 and acc is not None:
-                        if acc < 70:
-                            rev_days = 2
-                        elif acc < 90:
-                            rev_days = 7
-                        else:
-                            rev_days = 30
+                            # Lógica otimizada: mínimo de 10 questões para amostragem sólida
+                            if questions < 10:
+                                # Se fez menos de 10 questões, o volume é baixo. 
+                                # O sistema força uma revisão curta (5 dias) para revalidar com mais volume.
+                                rev_days = 5
+                            else:
+                                # Amostragem sólida (10+ questões), aplica o intervalo real por desempenho
+                                if acc < 70:
+                                    rev_days = 2    # Reforço imediato (abaixo da meta)
+                                elif acc < 85:
+                                    rev_days = 7    # Bom, mas exige reteste em 1 semana
+                                elif acc < 95:
+                                    rev_days = 14   # Desempenho sólido (2 semanas)
+                                else:
+                                    rev_days = 30   # Domínio excelente (1 mês)
 
-                        rev_date = date.today() + timedelta(days=rev_days)
-                        st.session_state.data["reviews"].append({
-                            "id": f"rev-{current_dt.strftime('%Y%m%d%H%M%S%f')}",
-                            "subject": subject_sel,
-                            "topic": topic_sel,
-                            "due_date": rev_date.isoformat(),
-                            "interval": f"{rev_days} dias ({acc:.0f}%)",
-                            "done": False,
-                            "dismissed": False
-                        })
+                            rev_date = date.today() + timedelta(days=rev_days)
+                            st.session_state.data["reviews"].append({
+                                "id": f"rev-{current_dt.strftime('%Y%m%d%H%M%S%f')}",
+                                "subject": subject_sel,
+                                "topic": topic_sel,
+                                "due_date": rev_date.isoformat(),
+                                "interval": f"{rev_days} dias ({acc:.0f}% em {questions}q)",
+                                "done": False,
+                                "dismissed": False
+                            })
 
                     advance_cycle(subject_sel)
                     reset_timer()

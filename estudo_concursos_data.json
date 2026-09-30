@@ -174,12 +174,12 @@
       "id": "blk-2026-09-08T21:15:53-10",
       "subject": "Língua Portuguesa",
       "name": "11. Conhecimentos linguísticos (Morfologia e Sintaxe)",
-      "status": "Não iniciado",
+      "status": "Estudando Teoria",
       "accuracy": 0.0,
-      "last_studied": null,
+      "last_studied": "2026-09-30",
       "assunto": "Geral",
       "historico_evolucao": "-",
-      "memoria": "⚪ Nunca"
+      "memoria": "🟢 Em dia (≤15d)"
     },
     {
       "id": "blk-2026-09-08T21:15:53-11",
@@ -197,8 +197,8 @@
       "subject": "Língua Portuguesa",
       "name": "13. Ortografia, grafia e Novo Acordo",
       "status": "Fazendo Questões",
-      "accuracy": 9.090909090909092,
-      "last_studied": "2026-09-28",
+      "accuracy": 90.9090909090909,
+      "last_studied": "2026-09-30",
       "assunto": "Geral",
       "historico_evolucao": "-",
       "memoria": "🟢 Em dia (≤15d)"
@@ -908,18 +908,6 @@
       "accuracy": 78.94736842105263
     },
     {
-      "id": "20260928195550458852",
-      "date": "2026-09-28",
-      "timestamp": "2026-09-28 19:55",
-      "subject": "Língua Portuguesa",
-      "topic": "13. Ortografia, grafia e Novo Acordo",
-      "phase": 2,
-      "minutes": 40.0,
-      "questions": 11,
-      "correct": 1,
-      "accuracy": 9.090909090909092
-    },
-    {
       "id": "20260928195613813794",
       "date": "2026-09-28",
       "timestamp": "2026-09-28 19:56",
@@ -930,6 +918,30 @@
       "questions": 6,
       "correct": 3,
       "accuracy": 50.0
+    },
+    {
+      "id": "20260930195714847104",
+      "date": "2026-09-30",
+      "timestamp": "2026-09-30 19:57",
+      "subject": "Língua Portuguesa",
+      "topic": "11. Conhecimentos linguísticos (Morfologia e Sintaxe)",
+      "phase": 1,
+      "minutes": 120.0,
+      "questions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    {
+      "id": "20260930195856886674",
+      "date": "2026-09-30",
+      "timestamp": "2026-09-30 19:58",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "phase": 2,
+      "minutes": 1.0,
+      "questions": 11,
+      "correct": 10,
+      "accuracy": 90.9090909090909
     }
   ],
   "errors": [
@@ -1006,7 +1018,7 @@
       "due_date": "2026-09-30",
       "interval": "2 dias (9%)",
       "done": false,
-      "dismissed": false
+      "dismissed": true
     },
     {
       "id": "rev-20260928195613813794",
@@ -1014,6 +1026,15 @@
       "topic": "1 Noções Gerais de Compreensão e Interpretação de Texto",
       "due_date": "2026-09-30",
       "interval": "2 dias (50%)",
+      "done": false,
+      "dismissed": false
+    },
+    {
+      "id": "rev-20260930195856886674",
+      "subject": "Língua Portuguesa",
+      "topic": "13. Ortografia, grafia e Novo Acordo",
+      "due_date": "2026-10-30",
+      "interval": "30 dias (91%)",
       "done": false,
       "dismissed": false
     }
