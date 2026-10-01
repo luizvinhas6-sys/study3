@@ -1032,32 +1032,40 @@ elif page == "❌ Erros":
                                         </div>
                                         """, unsafe_allow_html=True)
                                     
-                                    if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
-                                        full_file_path = ANEXOS_DIR / file_fn
-                                        if full_file_path.exists():
-                                            ext = full_file_path.suffix.lower()
-                                            if ext in [".png", ".jpg", ".jpeg"]:
-                                                st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
-                                            elif ext == ".txt":
-                                                try:
-                                                    with open(full_file_path, "r", encoding="utf-8") as txt_file:
-                                                        txt_data = txt_file.read()
-                                                    st.code(txt_data, language="text")
-                                                except Exception:
-                                                    st.error("Não foi possível ler o arquivo de texto.")
-                                            
-                                            icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
-                                            icon = icon_map.get(ext, "📎")
-                                            orig_name = "_".join(file_fn.split("_")[3:]) if "_" in file_fn else file_fn
-                                            
-                                            with open(full_file_path, "rb") as file_bytes:
-                                                st.download_button(
-                                                    label=f"{icon} Baixar anexo: {orig_name}",
-                                                    data=file_bytes,
-                                                    file_name=orig_name,
-                                                    mime="application/octet-stream",
-                                                    key=f"dl_err_{e_id}"
-                                                )
+                            if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
+                                full_file_path = ANEXOS_DIR / file_fn
+                                if full_file_path.exists():
+                                    ext = full_file_path.suffix.lower()
+                                    
+                                    # Se for imagem, mostra na tela
+                                    if ext in [".png", ".jpg", ".jpeg"]:
+                                        st.image(str(full_file_path), caption=f"Anexo — Motivo: {e_reas}", use_container_width=True)
+                                    
+                                    # Se for texto puro, exibe o conteúdo opcionalmente
+                                    elif ext == ".txt":
+                                        try:
+                                            with open(full_file_path, "r", encoding="utf-8") as txt_file:
+                                                txt_data = txt_file.read()
+                                            st.code(txt_data, language="text")
+                                        except Exception:
+                                            pass
+
+                                    # --- BOTÃO DE DOWNLOAD PARA QUALQUER ARQUIVO (PDF, DOCX, ETC) ---
+                                    icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
+                                    icon = icon_map.get(ext, "📎")
+                                    
+                                    # Limpeza segura do nome original do arquivo
+                                    parts = file_fn.split("_")
+                                    orig_name = "_".join(parts[3:]) if len(parts) >= 4 else file_fn
+                                    
+                                    with open(full_file_path, "rb") as file_bytes:
+                                        st.download_button(
+                                            label=f"{icon} Baixar anexo: {orig_name}",
+                                            data=file_bytes,
+                                            file_name=orig_name,
+                                            mime="application/octet-stream",
+                                            key=f"dl_err_{e_id}"
+                                )
 
                             with col_card2:
                                 st.markdown("<br>", unsafe_allow_html=True)
@@ -1104,45 +1112,48 @@ elif page == "📝 Mapas e Resumos":
     with st.expander("➕ Adicionar Novo Resumo / Mapa"):
         res_subj = st.selectbox("Disciplina", [s["name"] for s in st.session_state.data["subjects"]], key="res_s_cad")
         topics_res = [t["name"] for t in st.session_state.data["topics"] if t["subject"] == res_subj]
+        res_top = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_res, key="res_top_cad")
+
+        # Uploader fora do form para capturar o arquivo perfeitamente
+        uploaded_file = st.file_uploader(
+            "Anexar arquivo (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
+            type=["png", "jpg", "jpeg", "pdf", "txt", "doc", "docx", "ppt", "pptx"], 
+            key="res_file_up"
+        )
 
         with st.form("resumo_form"):
-            res_top = st.selectbox("Tópico (Opcional)", ["Nenhum"] + topics_res)
-            res_title = st.text_area("Título / Descrição (Pressione Enter para saltar linhas)", placeholder="Ex.: Fórmulas de Curto-Circuito ou Resumo PDF")
-            res_content = st.text_area("Texto do Resumo / Anotações (Use **negrito** ou __sublinhado__)", placeholder="Pressione Enter para saltar linhas. **Negrito** e __sublinhado__ ficarão destacados em amarelo.")
+            res_title = st.text_area("Título / Descrição (Pressione Enter para saltar linhas)", placeholder="Ex.: Fórmulas de Curto-Circuito ou Resumo PDF", key="res_title_cad")
+            res_content = st.text_area("Texto do Resumo / Anotações (Use **negrito** ou __sublinhado__)", placeholder="Pressione Enter para saltar linhas...", key="res_content_cad")
             
-            uploaded_file = st.file_uploader(
-                "Anexar arquivo (PDF, TXT, DOC/DOCX, PPT/PPTX ou Imagem)", 
-                type=["png", "jpg", "jpeg", "pdf", "txt", "doc", "docx", "ppt", "pptx"], 
-                key="res_file_up"
-            )
+            submitted_resumo = st.form_submit_button("💾 Salvar Resumo / Mapa", use_container_width=True)
 
-            if st.form_submit_button("💾 Salvar Resumo / Mapa", use_container_width=True):
-                if not res_title.strip():
-                    st.error("Informe um título ou descrição para o resumo.")
-                elif not res_content.strip() and uploaded_file is None:
-                    st.error("Você deve preencher o texto OU enviar um arquivo/anexo.")
-                else:
-                    file_filename = ""
-                    if uploaded_file is not None:
-                        file_filename = f"anexo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_file.name}"
-                        file_path = ANEXOS_DIR / file_filename
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
+        if submitted_resumo:
+            if not res_title.strip():
+                st.error("Informe um título ou descrição para o resumo.")
+            elif not res_content.strip() and uploaded_file is None:
+                st.error("Você deve preencher o texto OU enviar um arquivo/anexo.")
+            else:
+                file_filename = ""
+                if uploaded_file is not None:
+                    file_filename = f"anexo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uploaded_file.name}"
+                    file_path = ANEXOS_DIR / file_filename
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
 
-                    st.session_state.data["resumos"].append({
-                        "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
-                        "date": date.today().isoformat(),
-                        "subject": res_subj,
-                        "topic": res_top if res_top != "Nenhum" else "Geral",
-                        "title": res_title.strip(),
-                        "content": res_content.strip(),
-                        "file_filename": file_filename,
-                        "hits": 0,
-                        "misses": 0
-                    })
-                    persist()
-                    st.success("Resumo/Mapa salvo com sucesso!")
-                    st.rerun()
+                st.session_state.data["resumos"].append({
+                    "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
+                    "date": date.today().isoformat(),
+                    "subject": res_subj,
+                    "topic": res_top if res_top != "Nenhum" else "Geral",
+                    "title": res_title.strip(),
+                    "content": res_content.strip(),
+                    "file_filename": file_filename,
+                    "hits": 0,
+                    "misses": 0
+                })
+                persist()
+                st.success("Resumo/Mapa salvo com sucesso!")
+                st.rerun()
 
     st.divider()
 
@@ -1209,10 +1220,12 @@ elif page == "📝 Mapas e Resumos":
                                             </div>
                                             """, unsafe_allow_html=True)
                                         
+                                        # --- TRATAMENTO CORRETO DO ANEXO E BOTÃO DE DOWNLOAD ---
                                         if file_fn and not pd.isna(file_fn) and str(file_fn).lower() != "nan":
                                             full_file_path = ANEXOS_DIR / file_fn
                                             if full_file_path.exists():
                                                 ext = full_file_path.suffix.lower()
+                                                
                                                 if ext in [".png", ".jpg", ".jpeg"]:
                                                     st.image(str(full_file_path), caption=r_title, use_container_width=True)
                                                 elif ext == ".txt":
@@ -1221,11 +1234,13 @@ elif page == "📝 Mapas e Resumos":
                                                             txt_data = txt_file.read()
                                                         st.code(txt_data, language="text")
                                                     except Exception:
-                                                        st.error("Não foi possível ler o arquivo de texto.")
-                                                
+                                                        pass
+
                                                 icon_map = {".pdf": "📄", ".txt": "📄", ".doc": "📝", ".docx": "📝", ".ppt": "📊", ".pptx": "📊"}
                                                 icon = icon_map.get(ext, "📎")
-                                                orig_name = "_".join(file_fn.split("_")[2:]) if "_" in file_fn else file_fn
+                                                
+                                                parts = file_fn.split("_")
+                                                orig_name = "_".join(parts[3:]) if len(parts) >= 4 else file_fn
                                                 
                                                 with open(full_file_path, "rb") as file_bytes:
                                                     st.download_button(
@@ -1233,7 +1248,7 @@ elif page == "📝 Mapas e Resumos":
                                                         data=file_bytes,
                                                         file_name=orig_name,
                                                         mime="application/octet-stream",
-                                                        key=f"dl_{r_id}"
+                                                        key=f"dl_res_download_btn_{r_id}"
                                                     )
 
                                         st.markdown("<hr style='margin:4px 0;'>", unsafe_allow_html=True)
