@@ -1099,8 +1099,8 @@ elif page == "📝 Mapas e Resumos":
     if "editing_resumo_id" not in st.session_state:
         st.session_state.editing_resumo_id = None
 
-    ANEXOS_DIR = Path(__file__).resolve().parent / "anexos_estudos"
-    ANEXOS_DIR.mkdir(parents=True, exist_ok=True)
+    ANEXOS_DIR = BASE_DIR / "anexos_estudos"
+    ANEXOS_DIR.mkdir(exist_ok=True)
 
     if "resumos" in st.session_state.data:
         for item in st.session_state.data["resumos"]:
