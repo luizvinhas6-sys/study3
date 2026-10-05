@@ -86,12 +86,12 @@
       "id": "blk-2026-09-08T21:15:53-2",
       "subject": "Língua Portuguesa",
       "name": "3 Coesão e coerência",
-      "status": "Não iniciado",
+      "status": "Assimilado/Concluído",
       "accuracy": 0.0,
-      "last_studied": null,
+      "last_studied": "2026-10-05",
       "assunto": "Geral",
       "historico_evolucao": "-",
-      "memoria": "⚪ Nunca"
+      "memoria": "🟢 Em dia (≤15d)"
     },
     {
       "id": "blk-2026-09-08T21:15:53-3",
@@ -176,7 +176,7 @@
       "name": "11. Conhecimentos linguísticos (Morfologia e Sintaxe)",
       "status": "Estudando Teoria",
       "accuracy": 0.0,
-      "last_studied": "2026-09-30",
+      "last_studied": "2026-10-05",
       "assunto": "Geral",
       "historico_evolucao": "-",
       "memoria": "🟢 Em dia (≤15d)"
@@ -942,6 +942,30 @@
       "questions": 11,
       "correct": 10,
       "accuracy": 90.9090909090909
+    },
+    {
+      "id": "20261005201851419562",
+      "date": "2026-10-05",
+      "timestamp": "2026-10-05 20:18",
+      "subject": "Língua Portuguesa",
+      "topic": "3 Coesão e coerência",
+      "phase": 1,
+      "minutes": 20.0,
+      "questions": 0,
+      "correct": 0,
+      "accuracy": null
+    },
+    {
+      "id": "20261005201939299027",
+      "date": "2026-10-05",
+      "timestamp": "2026-10-05 20:19",
+      "subject": "Língua Portuguesa",
+      "topic": "11. Conhecimentos linguísticos (Morfologia e Sintaxe)",
+      "phase": 1,
+      "minutes": 60.0,
+      "questions": 0,
+      "correct": 0,
+      "accuracy": null
     }
   ],
   "errors": [
@@ -1000,7 +1024,7 @@
       "due_date": "2026-10-04",
       "interval": "7 dias (80%)",
       "done": false,
-      "dismissed": false
+      "dismissed": true
     },
     {
       "id": "rev-20260928025940754157",
@@ -1009,7 +1033,7 @@
       "due_date": "2026-10-05",
       "interval": "7 dias (79%)",
       "done": false,
-      "dismissed": false
+      "dismissed": true
     },
     {
       "id": "rev-20260928195550458852",
@@ -1027,7 +1051,7 @@
       "due_date": "2026-09-30",
       "interval": "2 dias (50%)",
       "done": false,
-      "dismissed": false
+      "dismissed": true
     },
     {
       "id": "rev-20260930195856886674",
@@ -1246,6 +1270,17 @@
       "title": "mapa mental completo",
       "content": "",
       "file_filename": "anexo_20261003093503_pdfcoffee.com_manuscrito-gramatical-2-pdf-free.pdf",
+      "hits": 0,
+      "misses": 0
+    },
+    {
+      "id": "20261005203836825641",
+      "date": "2026-10-05",
+      "subject": "Língua Portuguesa",
+      "topic": "11. Conhecimentos linguísticos (Morfologia e Sintaxe)",
+      "title": "Resumo completo pdf estratégia",
+      "content": "",
+      "file_filename": "anexo_20261005203836_14-exclusivamente-pdf-resumo-completo.pdf",
       "hits": 0,
       "misses": 0
     }
