@@ -251,15 +251,52 @@ def kpi_periods():
     today = date.today()
     week_start = today - timedelta(days=today.weekday())
     month_start = today.replace(day=1)
-    if df.empty: return 0, 0, 0, 0, 0
+    
+    # Cálculo do mês anterior
+    prev_month_end = month_start - timedelta(days=1)
+    prev_month_start = prev_month_end.replace(day=1)
+
+    if df.empty: return 0, 0, 0, 0, 0, 0
     df["parsed_date"] = pd.to_datetime(df["date"]).dt.date
     weekly_mins = df[df["parsed_date"] >= week_start]["minutes"].sum()
     monthly_mins = df[df["parsed_date"] >= month_start]["minutes"].sum()
+    
+    prev_monthly_mins = df[(df["parsed_date"] >= prev_month_start) & (df["parsed_date"] <= prev_month_end)]["minutes"].sum()
+    
     total_mins = df["minutes"].sum()
     total_q = df[df["parsed_date"] >= week_start]["questions"].sum()
     total_c = df[df["parsed_date"] >= week_start]["correct"].sum()
     weekly_acc = (total_c / total_q * 100) if total_q > 0 else 0.0
-    return weekly_mins / 60, monthly_mins / 60, total_mins / 60, total_q, weekly_acc
+    return weekly_mins / 60, monthly_mins / 60, prev_monthly_mins / 60, total_mins / 60, total_q, weekly_acc
+
+def get_study_streak():
+    df = session_dataframe()
+    if df.empty: return 0
+    
+    # Pega todas as datas únicas com estudo, ordenadas da mais recente para a mais antiga
+    df["parsed_date"] = pd.to_datetime(df["date"]).dt.date
+    studied_dates = sorted(df["parsed_date"].unique(), reverse=True)
+    
+    if not studied_dates: return 0
+    
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    
+    # Se não estudou hoje nem ontem, a sequência quebrou
+    if studied_dates[0] < yesterday:
+        return 0
+        
+    streak = 0
+    expected_date = studied_dates[0]
+    
+    for d in studied_dates:
+        if d == expected_date:
+            streak += 1
+            expected_date -= timedelta(days=1)
+        else:
+            break
+            
+    return streak
 
 def inject_css():
     st.markdown("""
@@ -293,12 +330,82 @@ page = st.sidebar.radio("Navegação", [
 
 st.sidebar.divider()
 
-weekly_sb, _, total_sb, _, _ = kpi_periods()
+# --- CÁLCULO DE TROFÉUS E SEU ACÚMULO HISTÓRICO ---
+df_sessions = session_dataframe()
+trophies_display = ""
+if not df_sessions.empty:
+    df_sessions["parsed_date"] = pd.to_datetime(df_sessions["date"]).dt.date
+    today = date.today()
+    
+    # Encontra todas as semanas passadas registradas para verificar se a meta de 22h foi batida
+    # Agrupa por ano e número da semana ISO
+    df_sessions["iso_year"] = pd.to_datetime(df_sessions["parsed_date"]).dt.isocalendar().year
+    df_sessions["iso_week"] = pd.to_datetime(df_sessions["parsed_date"]).dt.isocalendar().week
+    
+    weekly_hours_grouped = df_sessions.groupby(["iso_year", "iso_week"])["minutes"].sum() / 60
+    
+    # Conta quantas vezes bateu a meta de 22h em semanas anteriores/concluídas
+    # (Exclui a semana atual do acumulado fechado de títulos, se preferir contar apenas semanas vencidas)
+    current_year, current_week, _ = today.isocalendar()
+    
+    consecutive_wins = 0
+    # Ordena as semanas cronologicamente para contar sequências (Bi-campeão, etc.)
+    sorted_weeks = sorted(weekly_hours_grouped.index.tolist())
+    
+    metas_batidas_total = 0
+    for yr, wk in sorted_weeks:
+        # Se for a semana atual, avaliamos separadamente
+        if yr == current_year and wk == current_week:
+            continue
+        if weekly_hours_grouped[(yr, wk)] >= 22.0:
+            metas_batidas_total += 1
+
+    # Monta a string de troféus acumulados com base nas metas batidas
+    if metas_batidas_total > 0:
+        if metas_batidas_total == 1:
+            trophies_display = "🏆 Campeão Semanal"
+        elif metas_batidas_total == 2:
+            trophies_display = "🏆🏆 Bi-Campeão"
+        else:
+            trophies_display = f"🏆x{metas_batidas_total} ({metas_batidas_total}- Campeão)"
+
+# --- RENDERIZAÇÃO DA SIDEBAR ---
+st.sidebar.divider()
+
+weekly_sb, monthly_sb, prev_monthly_sb, total_sb, _, _ = kpi_periods()
 weekly_target_sb = st.session_state.data["settings"]["weekly_target_hours"]
 pct_weekly_sb = min(100, (weekly_sb / weekly_target_sb) * 100) if weekly_target_sb > 0 else 0
 
+monthly_target_sb = 100.0
+pct_monthly_sb = min(100, (monthly_sb / monthly_target_sb) * 100) if monthly_target_sb > 0 else 0
+
+streak_days = get_study_streak()
+
+# Exibição do Fogo de Sequência
+if streak_days > 0:
+    st.sidebar.markdown(f"### 🔥 Sequência: **{streak_days} {'dia' if streak_days == 1 else 'dias'}**")
+else:
+    st.sidebar.markdown(f"### 🔥 Sequência: **0 dias** *(Inicie hoje!)*")
+
 st.sidebar.progress(int(pct_weekly_sb), text=f"Semana: {weekly_sb:.1f}h / {weekly_target_sb}h ({pct_weekly_sb:.0f}%)")
-st.sidebar.markdown(f"🏆 Total geral: **{total_sb:.1f} h**")
+st.sidebar.progress(int(pct_monthly_sb), text=f"Mês Atual: {monthly_sb:.1f}h / {monthly_target_sb}h ({pct_monthly_sb:.0f}%)")
+st.sidebar.markdown(f"📅 Mês Anterior: **{prev_monthly_sb:.1f} h**")
+st.sidebar.markdown(f"🧠 Total geral: **{total_sb:.1f} h**")
+
+# Exibição dos Troféus acumulados se houver conquistas
+if trophies_display:
+    st.sidebar.markdown(f"**Conquistas:** {trophies_display}")
+
+# Verificação rápida dos badges da semana atual
+badges_semana = []
+if weekly_sb >= 10.0:
+    badges_semana.append("🚀 10h")
+if weekly_sb >= 22.0:
+    badges_semana.append("🏆 Meta 22h")
+
+if badges_semana:
+    st.sidebar.caption(f"Badges da semana: {' • '.join(badges_semana)}")
+
 st.sidebar.markdown(f"🎯 Regra: **≥ 70% = assimilado**")
 st.sidebar.caption(st.session_state.last_saved_message)
 
@@ -310,7 +417,7 @@ if page == "🏠 Painel":
     st.title("🏠 Painel de Comando")
     st.caption("Visão objetiva do seu progresso, metas e ações pendentes.")
 
-    weekly, monthly, total, q_week, acc_week = kpi_periods()
+    weekly, monthly, prev_monthly, total, q_week, acc_week = kpi_periods()
     target = st.session_state.data["settings"]["weekly_target_hours"]
     gap = weekly - target
 
